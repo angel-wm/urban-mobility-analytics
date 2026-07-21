@@ -16,6 +16,10 @@ venv/
 data/raw/
 data/processed/
 *.parquet
+
+# Keep small development samples
+!data/sample/*.parquet
+
 *.csv
 
 # Logs
