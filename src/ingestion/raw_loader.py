@@ -167,3 +167,119 @@ def fail_ingestion(
             "The failed ingestion record could not be updated. "
             f"Ingestion ID: {ingestion_id}."
         )
+
+def find_completed_ingestion(
+    engine: Engine,
+    source_file_name: str,
+    taxi_type: str,
+    period_year: int,
+    period_month: int,
+    file_size_bytes: int,
+) -> int | None:
+    """Return a matching completed ingestion ID, if one exists."""
+
+    statement = text(
+        """
+        SELECT ingestion_id
+        FROM raw.ingestion_log
+        WHERE
+            source_file_name = :source_file_name
+            AND taxi_type = :taxi_type
+            AND period_year = :period_year
+            AND period_month = :period_month
+            AND file_size_bytes = :file_size_bytes
+            AND status = 'completed'
+        ORDER BY ingestion_id DESC
+        LIMIT 1;
+        """
+    )
+
+    parameters = {
+        "source_file_name": source_file_name,
+        "taxi_type": taxi_type,
+        "period_year": period_year,
+        "period_month": period_month,
+        "file_size_bytes": file_size_bytes,
+    }
+
+    with engine.connect() as connection:
+        ingestion_id = connection.execute(
+            statement,
+            parameters,
+        ).scalar_one_or_none()
+
+    if ingestion_id is None:
+        return None
+
+    return int(ingestion_id)
+
+def record_skipped_ingestion(
+    engine: Engine,
+    source_file_name: str,
+    taxi_type: str,
+    period_year: int,
+    period_month: int,
+    file_size_bytes: int,
+) -> int:
+    """Record that a previously completed source file was skipped."""
+
+    statement = text(
+        """
+        INSERT INTO raw.ingestion_log (
+            source_file_name,
+            taxi_type,
+            period_year,
+            period_month,
+            file_size_bytes,
+            status,
+            completed_at
+        )
+        VALUES (
+            :source_file_name,
+            :taxi_type,
+            :period_year,
+            :period_month,
+            :file_size_bytes,
+            'skipped',
+            CURRENT_TIMESTAMP
+        )
+        RETURNING ingestion_id;
+        """
+    )
+
+    parameters = {
+        "source_file_name": source_file_name,
+        "taxi_type": taxi_type,
+        "period_year": period_year,
+        "period_month": period_month,
+        "file_size_bytes": file_size_bytes,
+    }
+
+    with engine.begin() as connection:
+        ingestion_id = connection.execute(
+            statement,
+            parameters,
+        ).scalar_one()
+
+    return int(ingestion_id)
+
+def delete_raw_taxi_trips_for_ingestion(
+    engine: Engine,
+    ingestion_id: int,
+) -> int:
+    """Delete partially loaded trips associated with an ingestion."""
+
+    statement = text(
+        """
+        DELETE FROM raw.taxi_trips
+        WHERE ingestion_id = :ingestion_id;
+        """
+    )
+
+    with engine.begin() as connection:
+        result = connection.execute(
+            statement,
+            {"ingestion_id": ingestion_id},
+        )
+
+    return result.rowcount

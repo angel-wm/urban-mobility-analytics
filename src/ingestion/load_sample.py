@@ -5,8 +5,11 @@ import pandas as pd
 from src.database import get_engine
 from src.ingestion.raw_loader import (
     complete_ingestion,
+    delete_raw_taxi_trips_for_ingestion,
     fail_ingestion,
+    find_completed_ingestion,
     load_raw_taxi_trips,
+    record_skipped_ingestion,
     start_ingestion,
 )
 from src.transformations.raw_taxi import (
@@ -14,7 +17,9 @@ from src.transformations.raw_taxi import (
 )
 
 
-SAMPLE_PATH = Path("data/sample/yellow_tripdata_2025-01_sample.parquet")
+SAMPLE_PATH = Path(
+    "data/sample/yellow_tripdata_2025-01_sample.parquet"
+)
 
 TAXI_TYPE = "yellow"
 PERIOD_YEAR = 2025
@@ -25,9 +30,42 @@ def main() -> None:
     """Load the development sample into the raw PostgreSQL tables."""
 
     if not SAMPLE_PATH.exists():
-        raise FileNotFoundError(f"Development sample not found: {SAMPLE_PATH}")
+        raise FileNotFoundError(
+            f"Development sample not found: {SAMPLE_PATH}"
+        )
 
     engine = get_engine()
+    file_size_bytes = SAMPLE_PATH.stat().st_size
+
+    completed_ingestion_id = find_completed_ingestion(
+        engine=engine,
+        source_file_name=SAMPLE_PATH.name,
+        taxi_type=TAXI_TYPE,
+        period_year=PERIOD_YEAR,
+        period_month=PERIOD_MONTH,
+        file_size_bytes=file_size_bytes,
+    )
+
+    if completed_ingestion_id is not None:
+        skipped_ingestion_id = record_skipped_ingestion(
+            engine=engine,
+            source_file_name=SAMPLE_PATH.name,
+            taxi_type=TAXI_TYPE,
+            period_year=PERIOD_YEAR,
+            period_month=PERIOD_MONTH,
+            file_size_bytes=file_size_bytes,
+        )
+
+        print("Sample ingestion skipped")
+        print(
+            "Matching completed ingestion: "
+            f"{completed_ingestion_id}"
+        )
+        print(
+            f"Skipped ingestion record: "
+            f"{skipped_ingestion_id}"
+        )
+        return
 
     rows_read = 0
     rows_loaded = 0
@@ -39,17 +77,21 @@ def main() -> None:
         taxi_type=TAXI_TYPE,
         period_year=PERIOD_YEAR,
         period_month=PERIOD_MONTH,
-        file_size_bytes=SAMPLE_PATH.stat().st_size,
+        file_size_bytes=file_size_bytes,
     )
 
     print(f"Ingestion started: {ingestion_id}")
 
     try:
-        source_dataframe = pd.read_parquet(SAMPLE_PATH)
+        source_dataframe = pd.read_parquet(
+            SAMPLE_PATH
+        )
 
         rows_read = len(source_dataframe)
 
-        prepared_dataframe = prepare_raw_taxi_dataframe(source_dataframe)
+        prepared_dataframe = prepare_raw_taxi_dataframe(
+            source_dataframe
+        )
 
         rows_loaded = load_raw_taxi_trips(
             engine=engine,
@@ -66,16 +108,22 @@ def main() -> None:
         )
 
     except Exception as error:
+        deleted_rows = delete_raw_taxi_trips_for_ingestion(
+            engine=engine,
+            ingestion_id=ingestion_id,
+        )
+
         fail_ingestion(
             engine=engine,
             ingestion_id=ingestion_id,
             error_message=str(error),
             rows_read=rows_read,
-            rows_loaded=rows_loaded,
+            rows_loaded=0,
             rows_rejected=rows_rejected,
         )
 
         print("Sample ingestion failed")
+        print(f"Partial rows deleted: {deleted_rows:,}")
         print(f"Details: {error}")
 
         raise
