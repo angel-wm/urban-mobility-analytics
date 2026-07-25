@@ -17,9 +17,7 @@ from src.transformations.raw_taxi import (
 )
 
 
-SAMPLE_PATH = Path(
-    "data/sample/yellow_tripdata_2025-01_sample.parquet"
-)
+SAMPLE_PATH = Path("data/sample/yellow_tripdata_2025-01_sample.parquet")
 
 TAXI_TYPE = "yellow"
 PERIOD_YEAR = 2025
@@ -30,9 +28,7 @@ def main() -> None:
     """Load the development sample into the raw PostgreSQL tables."""
 
     if not SAMPLE_PATH.exists():
-        raise FileNotFoundError(
-            f"Development sample not found: {SAMPLE_PATH}"
-        )
+        raise FileNotFoundError(f"Development sample not found: {SAMPLE_PATH}")
 
     engine = get_engine()
     file_size_bytes = SAMPLE_PATH.stat().st_size
@@ -57,14 +53,8 @@ def main() -> None:
         )
 
         print("Sample ingestion skipped")
-        print(
-            "Matching completed ingestion: "
-            f"{completed_ingestion_id}"
-        )
-        print(
-            f"Skipped ingestion record: "
-            f"{skipped_ingestion_id}"
-        )
+        print(f"Matching completed ingestion: {completed_ingestion_id}")
+        print(f"Skipped ingestion record: {skipped_ingestion_id}")
         return
 
     rows_read = 0
@@ -83,15 +73,11 @@ def main() -> None:
     print(f"Ingestion started: {ingestion_id}")
 
     try:
-        source_dataframe = pd.read_parquet(
-            SAMPLE_PATH
-        )
+        source_dataframe = pd.read_parquet(SAMPLE_PATH)
 
         rows_read = len(source_dataframe)
 
-        prepared_dataframe = prepare_raw_taxi_dataframe(
-            source_dataframe
-        )
+        prepared_dataframe = prepare_raw_taxi_dataframe(source_dataframe)
 
         rows_loaded = load_raw_taxi_trips(
             engine=engine,

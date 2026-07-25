@@ -168,6 +168,7 @@ def fail_ingestion(
             f"Ingestion ID: {ingestion_id}."
         )
 
+
 def find_completed_ingestion(
     engine: Engine,
     source_file_name: str,
@@ -212,6 +213,7 @@ def find_completed_ingestion(
         return None
 
     return int(ingestion_id)
+
 
 def record_skipped_ingestion(
     engine: Engine,
@@ -262,6 +264,7 @@ def record_skipped_ingestion(
         ).scalar_one()
 
     return int(ingestion_id)
+
 
 def delete_raw_taxi_trips_for_ingestion(
     engine: Engine,

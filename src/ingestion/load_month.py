@@ -19,9 +19,7 @@ from src.transformations.raw_taxi import (
 )
 
 
-DATA_PATH = Path(
-    "data/raw/yellow_tripdata_2025-01.parquet"
-)
+DATA_PATH = Path("data/raw/yellow_tripdata_2025-01.parquet")
 
 TAXI_TYPE = "yellow"
 PERIOD_YEAR = 2025
@@ -55,14 +53,8 @@ def main() -> None:
         )
 
         print("Monthly ingestion skipped")
-        print(
-            "Matching completed ingestion: "
-            f"{completed_ingestion_id}"
-        )
-        print(
-            "Skipped ingestion record: "
-            f"{skipped_ingestion_id}"
-        )
+        print(f"Matching completed ingestion: {completed_ingestion_id}")
+        print(f"Skipped ingestion record: {skipped_ingestion_id}")
         return
 
     rows_read = 0
@@ -90,9 +82,7 @@ def main() -> None:
             rows_in_group = len(source_dataframe)
             rows_read += rows_in_group
 
-            prepared_dataframe = prepare_raw_taxi_dataframe(
-                source_dataframe
-            )
+            prepared_dataframe = prepare_raw_taxi_dataframe(source_dataframe)
 
             loaded_in_group = load_raw_taxi_trips(
                 engine=engine,
@@ -103,19 +93,9 @@ def main() -> None:
 
             rows_loaded += loaded_in_group
 
-            print(
-                f"Row group "
-                f"{row_group_index + 1}/"
-                f"{metadata['row_groups']} completed"
-            )
-            print(
-                f"  Rows in group: "
-                f"{rows_in_group:,}"
-            )
-            print(
-                f"  Total rows loaded: "
-                f"{rows_loaded:,}"
-            )
+            print(f"Row group {row_group_index + 1}/{metadata['row_groups']} completed")
+            print(f"  Rows in group: {rows_in_group:,}")
+            print(f"  Total rows loaded: {rows_loaded:,}")
 
         if rows_read != metadata["rows"]:
             raise ValueError(
