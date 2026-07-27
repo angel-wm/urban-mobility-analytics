@@ -5,13 +5,10 @@ from requests.exceptions import RequestException
 
 
 DATA_URL = (
-    "https://d37ci6vzurychx.cloudfront.net/"
-    "trip-data/yellow_tripdata_2025-01.parquet"
+    "https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2025-01.parquet"
 )
 
-OUTPUT_PATH = Path(
-    "data/raw/yellow_tripdata_2025-01.parquet"
-)
+OUTPUT_PATH = Path("data/raw/yellow_tripdata_2025-01.parquet")
 
 CHUNK_SIZE_BYTES = 1024 * 1024
 
@@ -39,22 +36,17 @@ def download_file(url: str, destination: Path) -> None:
             downloaded_bytes = 0
 
             with destination.open("wb") as file:
-                for chunk in response.iter_content(
-                    chunk_size=CHUNK_SIZE_BYTES
-                ):
+                for chunk in response.iter_content(chunk_size=CHUNK_SIZE_BYTES):
                     if not chunk:
                         continue
 
                     file.write(chunk)
                     downloaded_bytes += len(chunk)
 
-                    downloaded_megabytes = (
-                        downloaded_bytes / 1024**2
-                    )
+                    downloaded_megabytes = downloaded_bytes / 1024**2
 
                     print(
-                        f"\rDownloaded: "
-                        f"{downloaded_megabytes:.1f} MB",
+                        f"\rDownloaded: {downloaded_megabytes:.1f} MB",
                         end="",
                     )
 

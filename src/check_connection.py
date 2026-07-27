@@ -5,7 +5,7 @@ from src.database import get_engine
 
 
 def main() -> None:
-    """Verifica la conexión y muestra los esquemas del proyecto."""
+    """Check the database connection and display the project schemas."""
 
     try:
         engine = get_engine()
@@ -24,9 +24,10 @@ def main() -> None:
 
             database_name, database_user, postgres_version = database_info
 
-            schemas = connection.execute(
-                text(
-                    """
+            schemas = (
+                connection.execute(
+                    text(
+                        """
                     SELECT schema_name
                     FROM information_schema.schemata
                     WHERE schema_name IN (
@@ -37,21 +38,24 @@ def main() -> None:
                     )
                     ORDER BY schema_name;
                     """
+                    )
                 )
-            ).scalars().all()
+                .scalars()
+                .all()
+            )
 
-        print("Conexión exitosa")
-        print(f"Base de datos: {database_name}")
-        print(f"Usuario: {database_user}")
-        print(f"Versión: {postgres_version.split(',')[0]}")
-        print("Esquemas encontrados:")
+        print("Connection successful")
+        print(f"Database: {database_name}")
+        print(f"User: {database_user}")
+        print(f"Version: {postgres_version.split(',')[0]}")
+        print("Schemas found:")
 
         for schema in schemas:
-            print(f"  - {schema}")
+            print(f" - {schema}")
 
     except (SQLAlchemyError, ValueError) as error:
-        print("No se pudo completar la comprobación de PostgreSQL.")
-        print(f"Detalle: {error}")
+        print("The PostgreSQL check could not be completed.")
+        print(f"Details: {error}")
         raise SystemExit(1) from error
 
 

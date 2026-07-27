@@ -5,29 +5,27 @@ from sqlalchemy import URL, Engine, create_engine
 
 load_dotenv()
 
+
 def get_required_environment_variable(name: str) -> str:
-    #Obtiene una variable de entorno obligatoria.
+    """Retrieves a required environment variable."""
 
     value = os.getenv(name)
 
     if not value:
-        raise ValueError(
-            f"La variable de entorno {name!r} no está configurada"
-        )
+        raise ValueError(f"The environment variable {name!r} is not set")
     return value
 
+
 def build_database_url() -> URL:
-    #Construye de forma segura la URL de conexión a PostgreSQL.
+    """Safely construct the URL for connecting to PostgreSQL."""
 
     port = get_required_environment_variable("POSTGRES_PORT")
 
     try:
         port_number = int(port)
     except ValueError as error:
-        raise ValueError(
-            "POSTGRES_PORT debe contener un nmúmero entero"
-        )from error
-    
+        raise ValueError("POSTGRES_PORT must contain an integer") from error
+
     return URL.create(
         drivername="postgresql+psycopg",
         username=get_required_environment_variable("POSTGRES_USER"),
@@ -37,9 +35,10 @@ def build_database_url() -> URL:
         database=get_required_environment_variable("POSTGRES_DB"),
     )
 
+
 def get_engine() -> Engine:
-    #Crea el motor de conexión utilizado por la aplicación
-    
+    """Creates the connection engine used by the application."""
+
     return create_engine(
         build_database_url(),
         pool_pre_ping=True,
