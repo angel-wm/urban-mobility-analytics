@@ -225,10 +225,56 @@ The following conditions are therefore documented but not deleted:
 - Timestamps outside the expected monthly period.
 - Rare or undocumented category values.
 
-These findings will inform the design of quality flags and standardized fields in the future `staging` layer.
+These findings informed the design of quality flags and standardized fields in the implemented `staging` layer.
 
 ## Limitations
 
 - The analysis covers only January 2025.
-- Category meanings have not yet been validated against the official NYC TLC data dictionary.
-- Thresholds such as distance
+- The category definitions were subsequently validated against the official
+  NYC TLC Yellow Taxi trip record data dictionary dated March 18, 2025.
+- The profile identifies unusual values but does not prove that every unusual
+  value is erroneous.
+- Thresholds such as distance over 100 or 1,000 miles, monetary amounts over
+  1,000, duration over 24 hours, and average speed over 80 mph were initially
+  exploratory.
+- Only duration over 24 hours was implemented as a staging suspicious-condition
+  flag. The remaining exploratory thresholds have not been formalized as
+  definitive quality rules.
+- Negative monetary values may represent refunds, reversals, corrections, or
+  other administrative transactions.
+- The relationship between Flex Fare trips and missing passenger, rate-code,
+  and store-and-forward attributes was observed in the data, but its complete
+  business meaning has not been independently confirmed.
+- The analysis does not validate pickup and drop-off location IDs against the
+  official Taxi Zone reference dataset.
+- Complete duplicate detection was not performed across the full monthly
+  dataset.
+- The source does not provide a direct business trip identifier.
+- Query performance was not evaluated during the foundational SQL profiling
+  phase.
+- The results describe the completed monthly ingestion with
+  `ingestion_id = 7` and must not be generalized automatically to future
+  months or other taxi datasets.
+
+## Staging Follow-Up
+
+The findings in this profile were used to create the PostgreSQL view:
+
+`staging.taxi_trips`
+
+The staging model adds:
+
+- Standardized monetary types.
+- Human-readable categorical descriptions.
+- Trip duration and average speed.
+- Detailed operational and quality flags.
+- Dynamically generated expected-period boundaries.
+- Reproducible validation queries.
+
+The staging implementation is documented in:
+
+`docs/staging_model.md`
+
+Its SQL definition and validation scripts are versioned under:
+
+`sql/staging/`

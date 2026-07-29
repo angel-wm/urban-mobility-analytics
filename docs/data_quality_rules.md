@@ -282,3 +282,208 @@ layers, especially `staging` and `analytics`.
 - Categorical codes have not yet been validated against all official reference
   definitions.
 - Current thresholds are exploratory and may change.
+
+---
+
+## 13. Staging Implementation Update
+
+The initial rules in this document were defined before the complete January
+2025 dataset was profiled.
+
+The `staging.taxi_trips` view now implements the confirmed rules described
+below. The original sections remain in this document as the historical basis
+for the staging design.
+
+### Record Preservation
+
+The staging layer preserves one row for every row in `raw.taxi_trips`.
+
+It does not:
+
+- Delete suspicious records.
+- Deduplicate trips.
+- Correct source timestamps.
+- Replace source category codes.
+- Exclude negative transactions.
+- Exclude records outside the expected period.
+
+Quality conditions are represented through independent boolean flags.
+
+### Operational Issues
+
+The consolidated flag:
+
+`has_operational_issue`
+
+is activated when at least one of the following conditions is present:
+
+- Pickup or drop-off timestamp is missing.
+- Drop-off occurs at or before pickup.
+- Trip distance is negative.
+
+These conditions prevent reliable use of the record for basic duration,
+distance, or speed analysis.
+
+### Suspicious Conditions
+
+The consolidated flag:
+
+`has_suspicious_condition`
+
+is activated when at least one of the following conditions is present:
+
+- Trip duration is greater than 24 hours.
+- Trip distance is zero.
+- Rate code is the documented unknown code `99`.
+- Payment type is the documented unknown code `5`.
+
+These conditions require review but do not automatically invalidate the
+record for every analytical purpose.
+
+### Missing Flex Fare Attributes
+
+The complete January 2025 dataset contains 540,149 rows where all the following
+conditions occur together:
+
+- `payment_type = 0`
+- `passenger_count IS NULL`
+- `ratecode_id IS NULL`
+- `store_and_fwd_flag IS NULL`
+
+Payment type `0` is documented as a Flex Fare trip.
+
+The staging layer records the missing values through:
+
+`has_missing_trip_attributes`
+
+The pattern is not automatically included in `has_suspicious_condition`
+because its business meaning has not been fully validated.
+
+### Negative Transactions
+
+The staging layer provides the following independent flags:
+
+- `is_negative_fare`
+- `is_negative_total_amount`
+- `is_negative_transaction`
+
+A negative transaction is preserved and may represent a refund, reversal,
+correction, or another administrative transaction.
+
+Negative values remain included in net monetary calculations unless a
+downstream metric explicitly defines a different treatment.
+
+### Expected Period
+
+The flag:
+
+`is_pickup_outside_expected_period`
+
+compares `pickup_datetime` with boundaries generated dynamically from the
+`period_year` and `period_month` stored in `raw.ingestion_log`.
+
+The rule does not hard-code January 2025.
+
+The expected interval is semi-open:
+
+```text
+pickup_datetime >= first day of the ingestion month
+pickup_datetime < first day of the following month
+```
+
+### Speed Analysis
+
+The derived field:
+
+`average_speed_mph`
+
+is calculated only when:
+
+- Pickup timestamp is present.
+- Drop-off timestamp is present.
+- Drop-off occurs after pickup.
+- Trip distance is greater than zero.
+
+The corresponding flag is:
+
+`is_valid_for_speed_analysis`
+
+Records that do not meet these conditions retain a `NULL` average speed.
+
+The exploratory threshold of 80 mph has not been implemented as a formal
+quality rule.
+
+### Category Validation
+
+The staging layer preserves original categorical codes and adds descriptive
+columns.
+
+It distinguishes between:
+
+- SQL `NULL`.
+- A recognized code whose documented meaning is `Unknown`.
+- A non-null code that is not recognized by the documented code set.
+
+The following recognized codes represent documented unknown values:
+
+- `ratecode_id = 99`
+- `payment_type = 5`
+
+The corresponding flags are:
+
+- `is_documented_unknown_ratecode`
+- `is_documented_unknown_payment_type`
+
+Unrecognized values are represented through:
+
+- `is_unrecognized_vendor`
+- `is_unrecognized_ratecode`
+- `is_unrecognized_payment_type`
+- `is_unrecognized_store_and_fwd`
+
+No unrecognized categorical codes were found in the January 2025 monthly
+ingestion.
+
+### Monetary Standardization
+
+Monetary values remain `DOUBLE PRECISION` in the raw layer.
+
+The staging view exposes them as:
+
+`NUMERIC(12, 2)`
+
+The conversion was validated against the January 2025 monthly ingestion.
+
+No observed monetary value exceeded the selected precision, and no observed
+value contained more than two decimal places.
+
+### General Quality Indicator
+
+The staging layer provides:
+
+`has_any_quality_flag`
+
+This flag is activated when at least one current detailed quality condition is
+present.
+
+The word `flag` is intentional. A flagged record is not necessarily erroneous
+or unusable for every analysis.
+
+Downstream models must select records according to the requirements of each
+metric instead of automatically removing every flagged row.
+
+### Rules Not Yet Formalized
+
+The following exploratory conditions have not been implemented as definitive
+staging rules:
+
+- Average speed greater than 80 mph.
+- Trip distance greater than 100 or 1,000 miles.
+- Monetary amount greater than 1,000.
+- Exact duplicate detection.
+- Passenger-count validity thresholds.
+- Taxi Zone identifier validation.
+- A single mutually exclusive quality classification.
+
+These rules require additional business validation, reference data, or
+analysis before they can be formalized.
