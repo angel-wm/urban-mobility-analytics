@@ -9,7 +9,8 @@ development using a production-oriented repository structure.
 
 ## Current Status
 
-The raw ingestion pipeline is complete.
+The raw ingestion, SQL profiling, staging, analytics, and analytical marts
+layers are complete.
 
 The January 2025 Yellow Taxi dataset contains:
 
@@ -17,9 +18,27 @@ The January 2025 Yellow Taxi dataset contains:
 - 20 source columns
 - 4 Parquet row groups
 - 0 technically rejected records during raw ingestion
+- 3,475,204 records inside the expected January 2025 pickup period
+- 22 records with pickup timestamps outside the expected period
 
 The pipeline also includes a 5,000-row development sample for lightweight
 testing and exploration.
+
+The current PostgreSQL analytical models include:
+
+- `staging.taxi_trips`
+- `analytics.daily_trip_metrics`
+- `analytics.hourly_trip_metrics`
+- `marts.daily_mobility_summary`
+- `marts.hourly_demand_profile`
+
+The analytics and marts layers provide daily and hourly metrics, conditional
+aggregations, cumulative totals, period shares, rankings, previous-period
+comparisons, and rolling averages.
+
+See [`docs/staging_model.md`](docs/staging_model.md) and
+[`docs/analytics_and_marts.md`](docs/analytics_and_marts.md) for the detailed
+model definitions and validation results.
 
 ## Architecture
 
@@ -35,12 +54,17 @@ Row-group-based ingestion
         v
 PostgreSQL
     raw
-    staging
-    analytics
-    marts
         |
         v
-SQL analysis and dimensional modeling
+    staging
+        |
+        +-------------------+
+        |                   |
+        v                   v
+    analytics.daily     analytics.hourly
+        |                   |
+        v                   v
+    marts.daily         marts.hourly
         |
         v
 Python EDA and Power BI
@@ -70,8 +94,12 @@ urban-mobility-analytics/
 ├── docs/
 ├── notebooks/
 ├── sql/
+│   ├── analysis/
+│   ├── analytics/
 │   ├── ddl/
-│   └── init/
+│   ├── init/
+│   ├── marts/
+│   └── staging/
 ├── src/
 │   ├── ingestion/
 │   └── transformations/
@@ -212,10 +240,10 @@ ruff format --check src
 - [x] Raw ingestion pipeline
 - [x] Idempotent file processing
 - [x] Ingestion verification
-- [ ] SQL exploration and profiling
-- [ ] Staging transformations
+- [x] SQL exploration and profiling
+- [x] Staging transformations
 - [ ] Dimensional model
-- [ ] Analytical marts
+- [x] Analytical marts
 - [ ] Query optimization
 - [ ] Automated tests
 - [ ] Power BI dashboard
