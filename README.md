@@ -9,8 +9,8 @@ development using a production-oriented repository structure.
 
 ## Current Status
 
-The raw ingestion, SQL profiling, staging, analytics, and analytical marts
-layers are complete.
+The raw ingestion, SQL profiling, staging, analytics, analytical marts, and
+dimensional-model layers are complete.
 
 The January 2025 Yellow Taxi dataset contains:
 
@@ -24,21 +24,34 @@ The January 2025 Yellow Taxi dataset contains:
 The pipeline also includes a 5,000-row development sample for lightweight
 testing and exploration.
 
-The current PostgreSQL analytical models include:
+The current PostgreSQL analytical and dimensional objects include:
 
 - `staging.taxi_trips`
 - `analytics.daily_trip_metrics`
 - `analytics.hourly_trip_metrics`
 - `marts.daily_mobility_summary`
 - `marts.hourly_demand_profile`
+- `marts.dim_ingestion`
+- `marts.dim_date`
+- `marts.dim_hour`
+- `marts.dim_vendor`
+- `marts.dim_rate_code`
+- `marts.dim_payment_type`
+- `marts.dim_store_and_fwd`
+- `marts.fact_trip`
 
-The analytics and marts layers provide daily and hourly metrics, conditional
+The analytics and summary marts provide daily and hourly metrics, conditional
 aggregations, cumulative totals, period shares, rankings, previous-period
 comparisons, and rolling averages.
 
-See [`docs/staging_model.md`](docs/staging_model.md) and
-[`docs/analytics_and_marts.md`](docs/analytics_and_marts.md) for the detailed
-model definitions and validation results.
+The dimensional model provides a trip-level star schema with 3,480,226 fact
+rows. It preserves the complete staging population, including the development
+sample and records outside the expected analytical period.
+
+See [`docs/staging_model.md`](docs/staging_model.md),
+[`docs/analytics_and_marts.md`](docs/analytics_and_marts.md), and
+[`docs/dimensional_model.md`](docs/dimensional_model.md) for detailed model
+definitions and validation results.
 
 ## Architecture
 
@@ -58,16 +71,18 @@ PostgreSQL
         v
     staging
         |
-        +-------------------+
-        |                   |
-        v                   v
-    analytics.daily     analytics.hourly
-        |                   |
-        v                   v
-    marts.daily         marts.hourly
-        |
-        v
-Python EDA and Power BI
+        +---------------------------+
+        |                           |
+        v                           v
+    analytics.daily/hourly      marts dimensions
+        |                           |
+        v                           v
+    marts summary views         marts.fact_trip
+        |                           |
+        +-------------+-------------+
+                      |
+                      v
+             Python EDA and Power BI
 ```
 
 ## Technology Stack
@@ -97,6 +112,7 @@ urban-mobility-analytics/
 │   ├── analysis/
 │   ├── analytics/
 │   ├── ddl/
+│   ├── dimensional/
 │   ├── init/
 │   ├── marts/
 │   └── staging/
@@ -128,6 +144,26 @@ The ingestion pipeline:
 
 See [`docs/ingestion_pipeline.md`](docs/ingestion_pipeline.md) for the detailed
 workflow.
+
+## Dimensional Model
+
+The dimensional layer implements a trip-level star schema in the PostgreSQL
+`marts` schema.
+
+Its grain is one row per `raw_trip_id`, with role-playing date and hour
+dimensions and separate dimensions for ingestion, vendor, rate code, payment
+type, and store-and-forward status.
+
+The fact table preserves all 3,480,226 staging rows, including the 5,000-row
+development sample and the 22 complete-ingestion trips outside the expected
+January pickup period.
+
+The model was validated for grain, row-count reconciliation, foreign-key
+integrity, dimension coverage, operational attributes, financial measures, and
+all staging quality flags.
+
+See [`docs/dimensional_model.md`](docs/dimensional_model.md) for the complete
+design, execution process, validation evidence, and known limitations.
 
 ## Data Quality Approach
 
@@ -242,7 +278,7 @@ ruff format --check src
 - [x] Ingestion verification
 - [x] SQL exploration and profiling
 - [x] Staging transformations
-- [ ] Dimensional model
+- [x] Dimensional model
 - [x] Analytical marts
 - [ ] Query optimization
 - [ ] Automated tests
