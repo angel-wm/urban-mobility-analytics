@@ -2,8 +2,9 @@
 
 ## Purpose
 
-This document describes the analytics-layer and marts-layer models built from
-`staging.taxi_trips`.
+This document describes the analytics-layer models built from
+`staging.taxi_trips` and the optimized marts-layer summary views built from the
+dimensional `marts.fact_trip` model.
 
 The models provide reusable daily and hourly mobility metrics while preserving
 ingestion-level traceability. They also demonstrate advanced SQL techniques,
@@ -27,19 +28,41 @@ staging.taxi_trips
         +------------------------------+
         |                              |
         v                              v
-analytics.daily_trip_metrics   analytics.hourly_trip_metrics
-        |                              |
-        v                              v
-marts.daily_mobility_summary   marts.hourly_demand_profile
+analytics.daily_trip_metrics      marts.fact_trip
+analytics.hourly_trip_metrics           |
+        |                               |
+        | validation baseline           | optimized source
+        |                               |
+        +-------------------+-----------+
+                            |
+                            v
+              marts.daily_mobility_summary
+              marts.hourly_demand_profile
 ```
+
+The `analytics` views remain staging-based analytical references. The final
+summary marts use the physical dimensional fact table for improved query
+performance and are reconciled against the analytics layer during validation.
 
 ---
 
 ## Source Model
 
-All analytics and mart models ultimately depend on:
+The analytics models depend directly on:
 
 `staging.taxi_trips`
+
+After query optimization, the final summary marts depend directly on:
+
+- `marts.fact_trip`
+- `marts.dim_ingestion`
+- `marts.dim_date`
+- `marts.dim_hour` for the hourly model
+
+The dimensional fact table is populated from the validated staging layer.
+Both branches therefore retain the same underlying trip-level source while the
+final marts avoid repeatedly evaluating staging expressions during consumption
+queries.
 
 The staging view provides:
 
@@ -295,9 +318,13 @@ The validation confirmed:
 
 PostgreSQL view.
 
-### Definition File
+### Base Definition File
 
 `sql/marts/01_create_daily_mobility_summary.sql`
+
+### Optimization Override
+
+`sql/optimization/02_optimize_mart_views.sql`
 
 ### Validation File
 
@@ -312,7 +339,14 @@ One row per:
 
 ### Source
 
-`analytics.daily_trip_metrics`
+The optimized view aggregates from:
+
+- `marts.fact_trip`
+- `marts.dim_ingestion`
+- `marts.dim_date`
+
+`analytics.daily_trip_metrics` remains the independent staging-based reference
+used to reconcile and validate the mart output.
 
 ### Purpose
 
@@ -413,9 +447,13 @@ The validation confirmed:
 
 PostgreSQL view.
 
-### Definition File
+### Base Definition File
 
 `sql/marts/03_create_hourly_demand_profile.sql`
+
+### Optimization Override
+
+`sql/optimization/02_optimize_mart_views.sql`
 
 ### Validation File
 
@@ -430,7 +468,15 @@ One row per:
 
 ### Source
 
-`analytics.hourly_trip_metrics`
+The optimized view aggregates from:
+
+- `marts.fact_trip`
+- `marts.dim_ingestion`
+- `marts.dim_date`
+- `marts.dim_hour`
+
+`analytics.hourly_trip_metrics` remains the independent staging-based reference
+used to reconcile and validate the mart output.
 
 ### Purpose
 
@@ -643,3 +689,9 @@ For the complete January 2025 Yellow Taxi dataset, use:
 ```sql
 WHERE ingestion_id = 7
 ```
+
+
+
+
+
+

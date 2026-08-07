@@ -76,13 +76,14 @@ PostgreSQL
         v                           v
     analytics.daily/hourly      marts dimensions
         |                           |
-        v                           v
-    marts summary views         marts.fact_trip
+        |                           v
+        |                       marts.fact_trip
         |                           |
-        +-------------+-------------+
-                      |
-                      v
-             Python EDA and Power BI
+        |                           v
+        +---- validation ----> marts summary views
+                                    |
+                                    v
+                           Python EDA and Power BI
 ```
 
 ## Technology Stack
@@ -115,6 +116,7 @@ urban-mobility-analytics/
 │   ├── dimensional/
 │   ├── init/
 │   ├── marts/
+│   ├── optimization/
 │   └── staging/
 ├── src/
 │   ├── ingestion/
@@ -268,6 +270,20 @@ ruff check src
 ruff format --check src
 ```
 
+## Query Optimization
+
+The query-optimization work introduces a selective index on
+`marts.fact_trip.ingestion_id` and optimized definitions of the final daily
+and hourly consumption marts.
+
+The optimized summary views aggregate directly from the dimensional fact table
+and dimensions, while the original staging-based `analytics` views remain
+unchanged as independent reconciliation and validation references.
+
+For the complete optimization rationale, benchmarks, implementation details,
+and validation results, see
+[`docs/query_optimization.md`](docs/query_optimization.md).
+
 ## Project Roadmap
 
 - [x] Repository and local environment
@@ -280,7 +296,7 @@ ruff format --check src
 - [x] Staging transformations
 - [x] Dimensional model
 - [x] Analytical marts
-- [ ] Query optimization
+- [x] Query optimization
 - [ ] Automated tests
 - [ ] Power BI dashboard
 - [ ] Continuous integration
@@ -295,3 +311,7 @@ development sample is versioned.
 ## Author
 
 Angel Miller
+
+
+
+

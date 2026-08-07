@@ -487,6 +487,15 @@ the expected January 2025 period.
 
 This is intentional and is not a reconciliation error.
 
+Following query optimization, `marts.daily_mobility_summary` and
+`marts.hourly_demand_profile` aggregate directly from `marts.fact_trip` and
+the supporting dimensions. They apply the same analytical eligibility rule by
+excluding `is_pickup_outside_expected_period` rows.
+
+The staging-based `analytics.daily_trip_metrics` and
+`analytics.hourly_trip_metrics` views remain unchanged and serve as independent
+references for reconciliation of the optimized marts.
+
 ---
 
 # Missing, Unknown, and Unrecognized Values
@@ -652,15 +661,19 @@ Validated results:
 - January 2025 is the only complete monthly source ingestion validated.
 - Taxi Zone identifiers have not been validated against the official lookup.
 - No Taxi Zone dimension is implemented.
-- Surrogate-key indexes and foreign-key indexes have not been evaluated.
-- Query performance has not been measured with `EXPLAIN ANALYZE`.
+- The selective `marts.fact_trip(ingestion_id)` index has been evaluated and
+  versioned; broader surrogate-key and foreign-key indexing has not been
+  exhaustively evaluated.
+- Query performance has been measured with
+  `EXPLAIN (ANALYZE, BUFFERS, SETTINGS, SUMMARY)`.
 - No materialized analytical layer has been introduced.
 - No slowly changing dimension Type 2 behavior is implemented.
 - No automated Python test suite currently executes the dimensional checks.
 - The load process performs upserts but does not delete obsolete target rows.
 
-Performance analysis, index selection, and physical optimization belong to the
-later `Query optimization` roadmap item.
+The completed query-optimization work, including index selection, execution
+plans, performance measurements, architectural decisions, and validation
+results, is documented in `docs/query_optimization.md`.
 
 ---
 
@@ -693,3 +706,6 @@ To reproduce the filtered analytical January population:
 WHERE ingestion_id = 7
   AND NOT is_pickup_outside_expected_period
 ```
+
+
+
