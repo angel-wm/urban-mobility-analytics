@@ -9,8 +9,9 @@ development using a production-oriented repository structure.
 
 ## Current Status
 
-The raw ingestion, SQL profiling, staging, analytics, analytical marts, and
-dimensional-model layers are complete.
+The raw ingestion, SQL profiling, staging, analytics, analytical marts,
+dimensional-model, query-optimization, and automated-testing layers are
+complete.
 
 The January 2025 Yellow Taxi dataset contains:
 
@@ -125,6 +126,7 @@ urban-mobility-analytics/
 ├── .env.example
 ├── .gitignore
 ├── docker-compose.yml
+├── pytest.ini
 ├── requirements.txt
 └── requirements-dev.txt
 ```
@@ -263,11 +265,23 @@ Verify the completed monthly ingestion:
 python -m src.ingestion.check_month_ingestion
 ```
 
+Run the default unit test suite:
+
+```powershell
+python -m pytest -v
+```
+
+Run PostgreSQL integration tests:
+
+```powershell
+python -m pytest -m integration -v
+```
+
 Run code-quality checks:
 
 ```powershell
-ruff check src
-ruff format --check src
+ruff check src tests
+ruff format --check tests
 ```
 
 ## Query Optimization
@@ -284,6 +298,24 @@ For the complete optimization rationale, benchmarks, implementation details,
 and validation results, see
 [`docs/query_optimization.md`](docs/query_optimization.md).
 
+## Automated Tests
+
+The project includes a pytest suite with 33 fast unit tests and 9 PostgreSQL
+integration tests.
+
+The default suite validates Python ingestion, transformation, Parquet,
+configuration, download, and orchestration behavior without requiring Docker.
+
+The integration suite uses read-only PostgreSQL queries to validate dimensional
+model invariants, analytical mart grain and reconciliation, and preservation of
+the optimized fact-based mart definitions.
+
+Integration tests are excluded from the default pytest run and are executed
+explicitly with the `integration` marker.
+
+See [`docs/automated_tests.md`](docs/automated_tests.md) for the complete test
+strategy, coverage, commands, validation results, and limitations.
+
 ## Project Roadmap
 
 - [x] Repository and local environment
@@ -297,7 +329,7 @@ and validation results, see
 - [x] Dimensional model
 - [x] Analytical marts
 - [x] Query optimization
-- [ ] Automated tests
+- [x] Automated tests
 - [ ] Power BI dashboard
 - [ ] Continuous integration
 
