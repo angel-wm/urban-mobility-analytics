@@ -1,0 +1,48 @@
+table 'marts dim_hour'
+	lineageTag: 6007647c-b721-4eab-9ae9-40cc505ac2ca
+
+	column hour_key
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 9e1b1547-6ee0-40f2-98e5-aa83acdf1e61
+		summarizeBy: none
+		sourceColumn: hour_key
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column hour_label
+		dataType: string
+		lineageTag: b7a076fc-cd87-4b84-a864-872832af0811
+		summarizeBy: none
+		sourceColumn: hour_label
+		sortByColumn: hour_key
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column day_period
+		dataType: string
+		lineageTag: 3217aa2b-41ee-4e2e-b8c1-c1e6fda39a9a
+		summarizeBy: none
+		sourceColumn: day_period
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'marts dim_hour' = m
+		mode: import
+		source =
+				let
+				  Source = PostgreSQL.Database("localhost:5433", "mobility_db", [CreateNavigationProperties = false]),
+				  #"Navigation 1" = Source{[Schema = "marts", Item = "dim_hour"]}[Data],
+				    #"Changed Type" = Table.TransformColumnTypes(#"Navigation 1",{{"hour_key", Int64.Type}})
+				in
+				  #"Changed Type"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

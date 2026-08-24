@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "urban_mobility_analytics"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "96527f54-ac1d-4242-840b-d99bf44fac55"
+  }
+}

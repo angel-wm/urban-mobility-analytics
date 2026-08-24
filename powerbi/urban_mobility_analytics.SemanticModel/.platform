@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "urban_mobility_analytics"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "6629d2a2-7d6c-4bb4-80ea-015f74f8c8d1"
+  }
+}

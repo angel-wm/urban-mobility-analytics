@@ -1,0 +1,50 @@
+table 'Quality Conditions'
+	lineageTag: 77cbcbf3-8c21-4884-8262-ddfd788063f8
+
+	measure 'Quality Condition Trips' =
+			
+			SWITCH(
+			    SELECTEDVALUE('Quality Conditions'[Condition]),
+			    "Quality Flag Trips", [Quality Flag Trips],
+			    "Negative Transactions", [Negative Transactions],
+			    "Suspicious Trips", [Suspicious Trips],
+			    "Operational Issue Trips", [Operational Issue Trips]
+			)
+		formatString: 0
+		lineageTag: 3dd2a63a-031e-442e-a3b6-611f9e800926
+
+	column Condition
+		lineageTag: c71e73fb-3b7f-4a1c-89a9-5a5144fe2e25
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Condition]
+		sortByColumn: 'Sort Order'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Sort Order'
+		formatString: 0
+		lineageTag: 53ea78cd-f6d8-48a6-836f-8ee9d46bc3ff
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Sort Order]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Quality Conditions' = calculated
+		mode: import
+		source =
+				
+				DATATABLE(
+				    "Condition", STRING,
+				    "Sort Order", INTEGER,
+				    {
+				        {"Quality Flag Trips", 1},
+				        {"Negative Transactions", 2},
+				        {"Suspicious Trips", 3},
+				        {"Operational Issue Trips", 4}
+				    }
+				)
+
+	annotation PBI_Id = 294304baeb444264bc93f5d572b839ae
+

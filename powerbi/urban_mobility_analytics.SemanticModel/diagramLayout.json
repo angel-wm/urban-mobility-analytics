@@ -1,0 +1,151 @@
+{
+  "version": "1.1.0",
+  "diagrams": [
+    {
+      "ordinal": 0,
+      "scrollPosition": {
+        "x": 155.68262678015117,
+        "y": 0
+      },
+      "nodes": [
+        {
+          "location": {
+            "x": 30.116536999999965,
+            "y": 471.23522599999967
+          },
+          "nodeIndex": "marts daily_mobility_summary",
+          "nodeLineageTag": "c8f9a144-9640-45ed-b49e-c18d9393adc5",
+          "size": {
+            "height": 431.09551400000026,
+            "width": 267.65965899999992
+          },
+          "zIndex": 1
+        },
+        {
+          "location": {
+            "x": 430.48932299999956,
+            "y": 565.45004379789691
+          },
+          "nodeIndex": "marts dim_date",
+          "nodeLineageTag": "c7fc9325-e448-4cb5-aa3f-9857881df12a",
+          "size": {
+            "height": 365.547757,
+            "width": 234
+          },
+          "zIndex": 8
+        },
+        {
+          "location": {
+            "x": 1182.8439033502013,
+            "y": 249.79010099999988
+          },
+          "nodeIndex": "marts dim_hour",
+          "nodeLineageTag": "6007647c-b721-4eab-9ae9-40cc505ac2ca",
+          "size": {
+            "height": 152,
+            "width": 234
+          },
+          "zIndex": 6
+        },
+        {
+          "location": {
+            "x": 350.76907799999964,
+            "y": 67.319317999999939
+          },
+          "nodeIndex": "marts dim_payment_type",
+          "nodeLineageTag": "3baf6b27-bcca-424f-a01e-ea0d5e484a0c",
+          "size": {
+            "height": 207.08624400000002,
+            "width": 266.51391156007742
+          },
+          "zIndex": 2
+        },
+        {
+          "location": {
+            "x": 1219.2945671886957,
+            "y": 653.00786311030345
+          },
+          "nodeIndex": "marts dim_rate_code",
+          "nodeLineageTag": "ba32c1eb-0249-4405-b437-cee324f04a09",
+          "size": {
+            "height": 238.17248799999993,
+            "width": 234
+          },
+          "zIndex": 5
+        },
+        {
+          "location": {
+            "x": 939.42806149829858,
+            "y": 0
+          },
+          "nodeIndex": "marts dim_store_and_fwd",
+          "nodeLineageTag": "18f3925c-4839-48d4-a5e9-c87389ef4a21",
+          "size": {
+            "height": 205.314683,
+            "width": 234
+          },
+          "zIndex": 3
+        },
+        {
+          "location": {
+            "x": 927.2184646690198,
+            "y": 758.63312620588545
+          },
+          "nodeIndex": "marts dim_vendor",
+          "nodeLineageTag": "21a3cc83-ffdf-4b87-b314-51ea90f5da01",
+          "size": {
+            "height": 188.40092700000002,
+            "width": 234
+          },
+          "zIndex": 4
+        },
+        {
+          "location": {
+            "x": 743.15121146616116,
+            "y": 266.4411725419115
+          },
+          "nodeIndex": "marts fact_trip",
+          "nodeLineageTag": "c0829343-d1b4-482a-bd03-7350ea1893d3",
+          "size": {
+            "height": 411.6083430000001,
+            "width": 234
+          },
+          "zIndex": 9
+        },
+        {
+          "location": {
+            "x": 1454.5589516099235,
+            "y": 330.02464699132685
+          },
+          "nodeIndex": "marts hourly_demand_profile",
+          "nodeLineageTag": "35196a2a-5e54-4afc-924d-afcc8c4e5f60",
+          "size": {
+            "height": 331.8880979999999,
+            "width": 267.659659
+          },
+          "zIndex": 7
+        },
+        {
+          "location": {
+            "x": 1742.1020736099235,
+            "y": 373.51702660294274
+          },
+          "nodeIndex": "Quality Conditions",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 0
+        }
+      ],
+      "name": "All tables",
+      "zoomValue": 56.447393005377812,
+      "pinKeyFieldsToTop": false,
+      "showExtraHeaderInfo": false,
+      "hideKeyFieldsWhenCollapsed": false,
+      "tablesLocked": false
+    }
+  ],
+  "selectedDiagram": "All tables",
+  "defaultDiagram": "All tables"
+}

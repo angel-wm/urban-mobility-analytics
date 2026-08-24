@@ -1,0 +1,32 @@
+relationship f4d86ce0-e0a7-9817-2e2c-eccae146d62c
+	fromColumn: 'marts fact_trip'.pickup_hour_key
+	toColumn: 'marts dim_hour'.hour_key
+
+relationship 0209d6fa-a17a-b4fa-5200-b2d0be076238
+	fromColumn: 'marts fact_trip'.pickup_date_key
+	toColumn: 'marts dim_date'.date_key
+
+relationship 16be07e9-7a11-8643-e502-ceffffde22bc
+	fromColumn: 'marts hourly_demand_profile'.pickup_hour
+	toColumn: 'marts dim_hour'.hour_key
+
+relationship 2e6445ad-3012-915c-5587-e7cf67ff6446
+	fromColumn: 'marts fact_trip'.vendor_key
+	toColumn: 'marts dim_vendor'.vendor_key
+
+relationship 442c26a9-e0b4-a1f2-ed48-d1e3f1f14d8c
+	fromColumn: 'marts fact_trip'.payment_type_key
+	toColumn: 'marts dim_payment_type'.payment_type_key
+
+relationship cc8b7b74-49cd-b4fa-59fd-e186f9e3a174
+	fromColumn: 'marts fact_trip'.rate_code_key
+	toColumn: 'marts dim_rate_code'.rate_code_key
+
+relationship 6abaf3fe-86f4-0916-b622-99b247ea2674
+	fromColumn: 'marts fact_trip'.store_and_fwd_key
+	toColumn: 'marts dim_store_and_fwd'.store_and_fwd_key
+
+relationship 8e6aec8b-7d1a-5560-9191-3e78f60a53f1
+	fromColumn: 'marts daily_mobility_summary'.pickup_date
+	toColumn: 'marts dim_date'.full_date
+

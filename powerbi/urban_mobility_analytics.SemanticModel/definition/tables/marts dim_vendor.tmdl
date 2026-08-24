@@ -1,0 +1,55 @@
+table 'marts dim_vendor'
+	lineageTag: 21a3cc83-ffdf-4b87-b314-51ea90f5da01
+
+	column vendor_key
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 803d98fd-cd42-4520-9681-046125dd7359
+		summarizeBy: none
+		sourceColumn: vendor_key
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column vendor_id
+		dataType: int64
+		formatString: 0
+		lineageTag: e544101a-0acd-405a-be8b-8470e84644cf
+		summarizeBy: none
+		sourceColumn: vendor_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column vendor_name
+		dataType: string
+		lineageTag: 242a7812-e4f1-4794-929c-0c397edfe2ab
+		summarizeBy: none
+		sourceColumn: vendor_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_unrecognized_vendor
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 85ad3e6d-3059-4844-a939-d6bbb0f6ceb9
+		summarizeBy: none
+		sourceColumn: is_unrecognized_vendor
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'marts dim_vendor' = m
+		mode: import
+		source =
+				let
+				  Source = PostgreSQL.Database("localhost:5433", "mobility_db", [CreateNavigationProperties = false]),
+				  #"Navigation 1" = Source{[Schema = "marts", Item = "dim_vendor"]}[Data],
+				    #"Changed Type" = Table.TransformColumnTypes(#"Navigation 1",{{"vendor_key", Int64.Type}})
+				in
+				  #"Changed Type"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

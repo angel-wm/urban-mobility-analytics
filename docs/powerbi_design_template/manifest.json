@@ -1,0 +1,34 @@
+{
+  "exported_at_utc": "2026-08-24T19:09:24.7990466Z",
+  "source_report": "powerbi/urban_mobility_analytics.Report",
+  "source_format": "PBIR",
+  "theme_source": "powerbi/urban_mobility_analytics.Report/StaticResources/SharedResources/BaseThemes/Fluent2-CY26SU08.json",
+  "theme_snapshot": "theme/nyc_taxi_theme.json",
+  "reference_scope": "Report/page/visual definitions only. Semantic model is intentionally excluded.",
+  "pages": [
+    {
+      "page_id": "895943f24a4d5888a485",
+      "display_name": "Executive Overview",
+      "reference_folder": "reference/executive_overview",
+      "width": 1920,
+      "height": 1080,
+      "visual_count": 18
+    },
+    {
+      "page_id": "8b2d29ab28b65bfaf1d5",
+      "display_name": "Demand Patterns",
+      "reference_folder": "reference/demand_patterns",
+      "width": 1920,
+      "height": 1080,
+      "visual_count": 15
+    },
+    {
+      "page_id": "5f07fa26b2878afa89ca",
+      "display_name": "Revenue & Quality",
+      "reference_folder": "reference/revenue_and_quality",
+      "width": 1920,
+      "height": 1080,
+      "visual_count": 20
+    }
+  ]
+}

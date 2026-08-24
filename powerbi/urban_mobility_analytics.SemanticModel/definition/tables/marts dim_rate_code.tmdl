@@ -1,0 +1,73 @@
+table 'marts dim_rate_code'
+	lineageTag: ba32c1eb-0249-4405-b437-cee324f04a09
+
+	column rate_code_key
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: adfb22b2-a9b1-4380-9b0b-64b5698b387e
+		summarizeBy: none
+		sourceColumn: rate_code_key
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ratecode_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 33ce636b-77c3-4fb5-bfb8-1f4b6c3906f9
+		summarizeBy: none
+		sourceColumn: ratecode_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column ratecode_name
+		dataType: string
+		lineageTag: 7f412d61-384f-460e-8f7d-1adc4bc87551
+		summarizeBy: none
+		sourceColumn: ratecode_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_unrecognized_ratecode
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 3e3a9588-f73f-4361-bb19-3116b6e99d58
+		summarizeBy: none
+		sourceColumn: is_unrecognized_ratecode
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_documented_unknown_ratecode
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 4cfa0b81-ab5a-4816-afca-6543bda6214e
+		summarizeBy: none
+		sourceColumn: is_documented_unknown_ratecode
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_missing
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 948e3d0f-2619-4cc6-8fc0-a4be5070416e
+		summarizeBy: none
+		sourceColumn: is_missing
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'marts dim_rate_code' = m
+		mode: import
+		source =
+				let
+				  Source = PostgreSQL.Database("localhost:5433", "mobility_db", [CreateNavigationProperties = false]),
+				  #"Navigation 1" = Source{[Schema = "marts", Item = "dim_rate_code"]}[Data],
+				    #"Changed Type" = Table.TransformColumnTypes(#"Navigation 1",{{"rate_code_key", Int64.Type}})
+				in
+				  #"Changed Type"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

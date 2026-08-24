@@ -1,0 +1,63 @@
+table 'marts dim_store_and_fwd'
+	lineageTag: 18f3925c-4839-48d4-a5e9-c87389ef4a21
+
+	column store_and_fwd_key
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: eb0057e6-3323-42e4-a82f-ab10b86ee126
+		summarizeBy: none
+		sourceColumn: store_and_fwd_key
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column store_and_fwd_flag
+		dataType: string
+		lineageTag: f708b5f7-e8f3-4ea6-a482-8fa3c6c1c0a2
+		summarizeBy: none
+		sourceColumn: store_and_fwd_flag
+
+		annotation SummarizationSetBy = Automatic
+
+	column store_and_fwd_description
+		dataType: string
+		lineageTag: df3140bb-88d1-482a-981e-8b2116ccca6a
+		summarizeBy: none
+		sourceColumn: store_and_fwd_description
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_unrecognized_store_and_fwd
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 21b70da2-0ca0-42cc-a3d5-85106624a006
+		summarizeBy: none
+		sourceColumn: is_unrecognized_store_and_fwd
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_missing
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: fa12812a-ccbe-46d6-882e-061c44f601d4
+		summarizeBy: none
+		sourceColumn: is_missing
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'marts dim_store_and_fwd' = m
+		mode: import
+		source =
+				let
+				  Source = PostgreSQL.Database("localhost:5433", "mobility_db", [CreateNavigationProperties = false]),
+				  #"Navigation 1" = Source{[Schema = "marts", Item = "dim_store_and_fwd"]}[Data],
+				    #"Changed Type" = Table.TransformColumnTypes(#"Navigation 1",{{"store_and_fwd_key", Int64.Type}})
+				in
+				  #"Changed Type"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

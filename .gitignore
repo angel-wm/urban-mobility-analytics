@@ -36,3 +36,8 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
+
+# Power BI
+*.pbix
+**/.pbi/localSettings.json
+**/.pbi/cache.abf

@@ -1,0 +1,282 @@
+table 'marts daily_mobility_summary'
+	lineageTag: c8f9a144-9640-45ed-b49e-c18d9393adc5
+
+	column ingestion_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 43f80f2a-d077-4c41-a9be-3a35e0b6b414
+		summarizeBy: sum
+		sourceColumn: ingestion_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column source_file_name
+		dataType: string
+		lineageTag: 9aa87a78-4e2e-42b5-bdcf-c00e97f4a4c3
+		summarizeBy: none
+		sourceColumn: source_file_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column taxi_type
+		dataType: string
+		lineageTag: 6c2e0e8d-4c91-4694-ad44-7b02f62e37ff
+		summarizeBy: none
+		sourceColumn: taxi_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column period_year
+		dataType: int64
+		formatString: 0
+		lineageTag: 2be63584-8c81-4a57-b60a-eaf068bf6cce
+		summarizeBy: sum
+		sourceColumn: period_year
+
+		annotation SummarizationSetBy = Automatic
+
+	column period_month
+		dataType: int64
+		formatString: 0
+		lineageTag: e623a73b-b4d4-474a-ab25-e8ba49467882
+		summarizeBy: sum
+		sourceColumn: period_month
+
+		annotation SummarizationSetBy = Automatic
+
+	column pickup_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 1e27f544-8ec8-4cb3-ac67-d31bd782dfc8
+		summarizeBy: none
+		sourceColumn: pickup_date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column trip_count
+		dataType: int64
+		formatString: 0
+		lineageTag: f083c089-e5bc-410e-8196-d9d539ad5128
+		summarizeBy: sum
+		sourceColumn: trip_count
+
+		annotation SummarizationSetBy = Automatic
+
+	column operational_issue_trip_count
+		dataType: int64
+		formatString: 0
+		lineageTag: bbe3d22f-3777-4eeb-a52a-bc2efcc12e00
+		summarizeBy: sum
+		sourceColumn: operational_issue_trip_count
+
+		annotation SummarizationSetBy = Automatic
+
+	column suspicious_condition_trip_count
+		dataType: int64
+		formatString: 0
+		lineageTag: a27297b5-21e5-4ab8-838a-8e00ad217b25
+		summarizeBy: sum
+		sourceColumn: suspicious_condition_trip_count
+
+		annotation SummarizationSetBy = Automatic
+
+	column any_quality_flag_trip_count
+		dataType: int64
+		formatString: 0
+		lineageTag: e719be1d-9894-4cc4-9fdd-382312328e75
+		summarizeBy: sum
+		sourceColumn: any_quality_flag_trip_count
+
+		annotation SummarizationSetBy = Automatic
+
+	column negative_transaction_trip_count
+		dataType: int64
+		formatString: 0
+		lineageTag: 7db66fb7-e4ab-485d-b790-947fa86d02a3
+		summarizeBy: sum
+		sourceColumn: negative_transaction_trip_count
+
+		annotation SummarizationSetBy = Automatic
+
+	column valid_speed_trip_count
+		dataType: int64
+		formatString: 0
+		lineageTag: 5f4662fe-f3c4-4ab6-8128-111c8dc2fe06
+		summarizeBy: sum
+		sourceColumn: valid_speed_trip_count
+
+		annotation SummarizationSetBy = Automatic
+
+	column total_trip_distance
+		dataType: double
+		lineageTag: 33ce573b-3d5b-4215-bf5b-21ee50a505c5
+		summarizeBy: sum
+		sourceColumn: total_trip_distance
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column average_trip_distance
+		dataType: double
+		lineageTag: df5d8e94-ee24-4510-8b11-14c07f665aac
+		summarizeBy: sum
+		sourceColumn: average_trip_distance
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column average_trip_duration_minutes
+		dataType: double
+		lineageTag: 305cbb73-f81e-4144-8b32-8c0e49162df4
+		summarizeBy: sum
+		sourceColumn: average_trip_duration_minutes
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column average_speed_mph
+		dataType: double
+		lineageTag: d434b134-caae-4e78-9ca4-901b1c90d6b5
+		summarizeBy: sum
+		sourceColumn: average_speed_mph
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column positive_total_amount
+		dataType: double
+		lineageTag: de947ce6-3c1f-45b8-b816-e26bcab124a1
+		summarizeBy: sum
+		sourceColumn: positive_total_amount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column negative_total_amount
+		dataType: double
+		lineageTag: c063a39b-0d35-49b8-a0d4-ac7e4cde08f0
+		summarizeBy: sum
+		sourceColumn: negative_total_amount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column net_total_amount
+		dataType: double
+		lineageTag: 71310e6e-5d97-4903-9fac-63df6b96b93e
+		summarizeBy: sum
+		sourceColumn: net_total_amount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column average_total_amount
+		dataType: double
+		lineageTag: eb8fb80b-553f-468a-8a6c-a1e2badfc5a5
+		summarizeBy: sum
+		sourceColumn: average_total_amount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column previous_day_trip_count
+		dataType: int64
+		formatString: 0
+		lineageTag: f1571ea8-b9a5-49e8-ad4f-20d50dc08b2d
+		summarizeBy: sum
+		sourceColumn: previous_day_trip_count
+
+		annotation SummarizationSetBy = Automatic
+
+	column daily_trip_count_change
+		dataType: int64
+		formatString: 0
+		lineageTag: a7e1761c-a7f8-4b10-9e9a-9b674aae0f33
+		summarizeBy: sum
+		sourceColumn: daily_trip_count_change
+
+		annotation SummarizationSetBy = Automatic
+
+	column daily_trip_count_change_percentage
+		dataType: double
+		lineageTag: 803feb4e-6854-460d-a52e-9dc284099ece
+		summarizeBy: sum
+		sourceColumn: daily_trip_count_change_percentage
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column cumulative_trip_count
+		dataType: int64
+		formatString: 0
+		lineageTag: d04ded98-781f-489c-9488-016ca253c3e9
+		summarizeBy: sum
+		sourceColumn: cumulative_trip_count
+
+		annotation SummarizationSetBy = Automatic
+
+	column cumulative_net_total_amount
+		dataType: double
+		lineageTag: dcebd0c6-96a9-4fd5-b7ea-29a1f1b568c2
+		summarizeBy: sum
+		sourceColumn: cumulative_net_total_amount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column rolling_7_day_average_trip_count
+		dataType: double
+		lineageTag: e66492f7-d2a6-4fec-97ff-c75eff9c1966
+		summarizeBy: sum
+		sourceColumn: rolling_7_day_average_trip_count
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column trip_demand_rank
+		dataType: int64
+		formatString: 0
+		lineageTag: b8480504-bac3-4787-add2-11908ad68cf6
+		summarizeBy: sum
+		sourceColumn: trip_demand_rank
+
+		annotation SummarizationSetBy = Automatic
+
+	column period_trip_share_percentage
+		dataType: double
+		lineageTag: 2cd30d93-8bf5-41cc-a54a-a026f7f7bb4c
+		summarizeBy: sum
+		sourceColumn: period_trip_share_percentage
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition 'marts daily_mobility_summary' = m
+		mode: import
+		source =
+				let
+				  Source = PostgreSQL.Database("localhost:5433", "mobility_db", [CreateNavigationProperties = false]),
+				  #"Navigation 1" = Source{[Schema = "marts", Item = "daily_mobility_summary"]}[Data],
+				    #"Filtered Rows" = Table.SelectRows(#"Navigation 1", each ([ingestion_id] = 7)),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Filtered Rows",{{"period_year", Int64.Type}, {"period_month", Int64.Type}})
+				in
+				  #"Changed Type"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

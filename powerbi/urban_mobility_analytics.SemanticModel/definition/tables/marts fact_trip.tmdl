@@ -1,0 +1,365 @@
+table 'marts fact_trip'
+	lineageTag: c0829343-d1b4-482a-bd03-7350ea1893d3
+
+	measure 'Total Trips' = COUNTROWS('marts fact_trip')
+		formatString: 0
+		lineageTag: 6bbaa5f6-2c46-4b86-8f36-a1b26dd85783
+
+	measure 'Net Revenue' = SUM('marts fact_trip'[total_amount])
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 7a884b2a-2144-44a3-80b5-330c849299d8
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Average Trip Distance' = AVERAGE('marts fact_trip'[trip_distance])
+		formatString: 0.00 "mi"
+		lineageTag: e6ea39c6-2794-4a39-bdfa-f31952f9ce8d
+
+		annotation PBI_FormatHint = {"isCustom":true}
+
+	measure 'Average Trip Duration' = AVERAGE('marts fact_trip'[trip_duration_minutes])
+		formatString: 0.00 "min"
+		lineageTag: bd5cb393-cab5-492b-a3cf-be28601d1963
+
+		annotation PBI_FormatHint = {"isCustom":true}
+
+	measure 'Average Speed' =
+			
+			CALCULATE(
+			    AVERAGE('marts fact_trip'[average_speed_mph]),
+			    'marts fact_trip'[is_valid_for_speed_analysis] = TRUE()
+			)
+		formatString: 0.00 "mph"
+		lineageTag: f669766d-6389-4b88-8e89-a7244cd6db25
+
+		annotation PBI_FormatHint = {"isCustom":true}
+
+	measure 'Total Tips' = SUM('marts fact_trip'[tip_amount])
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: f92906ff-ef6c-408f-8bc7-78294154b7b4
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Negative Transactions' = ```
+			
+			CALCULATE([Total Trips], 
+			'marts fact_trip'[is_negative_transaction] = TRUE()
+			)
+			```
+		formatString: 0
+		lineageTag: 3084242d-c882-4742-84dc-59e5f25211a3
+
+	measure 'Quality Flag Trips' =
+			
+			CALCULATE(
+			    [Total Trips],
+			    'marts fact_trip'[has_any_quality_flag] = TRUE()
+			)
+		formatString: 0
+		lineageTag: 9cb2acbc-f50f-433f-8b40-76c4d69a2b4d
+
+	measure 'Suspicious Trips' =
+			
+			CALCULATE(
+			    [Total Trips],
+			    'marts fact_trip'[has_suspicious_condition] = TRUE()
+			)
+		formatString: 0
+		lineageTag: 9ecb5402-12e6-4ff2-8e92-4669edc93d60
+
+	measure 'Operational Issue Trips' =
+			
+			CALCULATE(
+			    [Total Trips],
+			    'marts fact_trip'[has_operational_issue] = TRUE()
+			)
+		formatString: 0
+		lineageTag: dde3da13-55d1-4bac-8777-8c768c869b46
+
+	measure 'Negative Transaction Rate' =
+			
+			DIVIDE(
+			    [Negative Transactions],
+			    'marts fact_trip'[Total Trips]
+			)
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: bd2bc5fc-47fe-4222-a818-606719378d35
+
+	measure 'Quality Flag Rate' =
+			
+			DIVIDE(
+			    [Quality Flag Trips],
+			    [Total Trips]
+			)
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 3e8dd14b-0417-402b-99fd-039000bcb80a
+
+	measure 'Suspicious Trip Rate' =
+			
+			DIVIDE(
+			    [Suspicious Trips],
+			    [Total Trips]
+			)
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: c0b2864c-b123-4a0a-b1bb-fccaaf3a0699
+
+	measure 'Operationa Issue Rate' =
+			
+			DIVIDE(
+			    [Operational Issue Trips],
+			    [Total Trips]
+			)
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: e335e178-bb02-447e-b64e-42732ac0028c
+
+	measure 'Average Daily Trips' =
+			
+			DIVIDE(
+			    'marts fact_trip'[Total Trips],
+			    DISTINCTCOUNT('marts dim_date'[full_date])
+			)
+		formatString: 0.00
+		lineageTag: 6dd4bcc3-cec9-4eb8-b9b8-805e5b9046f6
+
+	measure 'Average Revenue per Trip' =
+			
+			DIVIDE(
+			    [Net Revenue],
+			    [Total Trips]
+			)
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: d915f0b6-04e0-404f-8c7b-0d172093479c
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column pickup_date_key
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: b399f813-7c60-4e89-bcdb-33a78db9aded
+		summarizeBy: none
+		sourceColumn: pickup_date_key
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column pickup_hour_key
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 56bb982e-e47f-46dc-9276-fbdd333c54cd
+		summarizeBy: none
+		sourceColumn: pickup_hour_key
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column vendor_key
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 31ab0a08-5b53-4727-94be-5d8bd14d3a21
+		summarizeBy: none
+		sourceColumn: vendor_key
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column rate_code_key
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 06459aaa-2bd3-4004-8dd0-72ee88d2bab9
+		summarizeBy: none
+		sourceColumn: rate_code_key
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column payment_type_key
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 36a47e29-0555-41e6-8ea7-0b18f483c4bf
+		summarizeBy: none
+		sourceColumn: payment_type_key
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column store_and_fwd_key
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: d57d71cd-2dd0-4bd8-90ef-57da4944e4b6
+		summarizeBy: none
+		sourceColumn: store_and_fwd_key
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column passenger_count
+		dataType: int64
+		formatString: 0
+		lineageTag: be5d0bbd-f042-46c0-98e4-2ae3092da415
+		summarizeBy: sum
+		sourceColumn: passenger_count
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column trip_distance
+		dataType: double
+		lineageTag: e9e7927b-fc00-4329-9495-5b62e630461e
+		summarizeBy: sum
+		sourceColumn: trip_distance
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column trip_duration_minutes
+		dataType: double
+		lineageTag: ac2e6c6e-bc1e-4737-9ed8-fb4e29c9c790
+		summarizeBy: sum
+		sourceColumn: trip_duration_minutes
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column average_speed_mph
+		dataType: double
+		lineageTag: 5725198d-3801-4876-bcde-58e6a9cb09cf
+		summarizeBy: sum
+		sourceColumn: average_speed_mph
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column fare_amount
+		dataType: decimal
+		formatString: \$#,0.###############;-\$#,0.###############;\$#,0.###############
+		lineageTag: 0978c5bc-4849-46b3-ad21-047e562f367f
+		summarizeBy: sum
+		sourceColumn: fare_amount
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-GB"}
+
+	column tip_amount
+		dataType: decimal
+		formatString: \$#,0.###############;-\$#,0.###############;\$#,0.###############
+		lineageTag: 4b377a5a-d6e3-42e2-be6b-794aca12fb20
+		summarizeBy: sum
+		sourceColumn: tip_amount
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-GB"}
+
+	column total_amount
+		dataType: decimal
+		formatString: \$#,0.###############;-\$#,0.###############;\$#,0.###############
+		lineageTag: 22ad28db-99d2-4dde-b466-fb495032c7dc
+		summarizeBy: sum
+		sourceColumn: total_amount
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-GB"}
+
+	column is_negative_transaction
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: e5a2ed42-bbc2-43d6-99ec-13ae1e15bc63
+		summarizeBy: none
+		sourceColumn: is_negative_transaction
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column has_operational_issue
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 3cb70d14-7505-4315-a2f2-c91847164ea1
+		summarizeBy: none
+		sourceColumn: has_operational_issue
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column has_suspicious_condition
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: b0786549-35bc-4554-8cb0-71321e59efc5
+		summarizeBy: none
+		sourceColumn: has_suspicious_condition
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column has_any_quality_flag
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 75b0638c-9eee-4dec-8093-b8c2c1ba211c
+		summarizeBy: none
+		sourceColumn: has_any_quality_flag
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_valid_for_speed_analysis
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: aae02de2-f44a-4d1a-905e-60423fb3e2b7
+		summarizeBy: none
+		sourceColumn: is_valid_for_speed_analysis
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'marts fact_trip' = m
+		mode: import
+		source =
+				let
+				  Source = PostgreSQL.Database("localhost:5433", "mobility_db", [CreateNavigationProperties = false]),
+				  #"Navigation 1" = Source{[Schema = "marts", Item = "fact_trip"]}[Data],
+				    #"Filtered Rows" = Table.SelectRows(#"Navigation 1", each ([ingestion_id] = 7) and ([is_pickup_outside_expected_period] = false)),
+				    #"Removed Other Columns" = Table.SelectColumns(#"Filtered Rows",{"pickup_date_key", "pickup_hour_key", "vendor_key", "rate_code_key", "payment_type_key", "store_and_fwd_key", "passenger_count", "trip_distance", "trip_duration_minutes", "average_speed_mph", "fare_amount", "tip_amount", "total_amount", "is_negative_transaction", "has_operational_issue", "has_suspicious_condition", "has_any_quality_flag", "is_valid_for_speed_analysis"}),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Removed Other Columns",{{"pickup_hour_key", Int64.Type}, {"vendor_key", Int64.Type}, {"rate_code_key", Int64.Type}, {"payment_type_key", Int64.Type}, {"store_and_fwd_key", Int64.Type}, {"passenger_count", Int64.Type}, {"trip_distance", type number}, {"fare_amount", Currency.Type}, {"tip_amount", Currency.Type}, {"total_amount", Currency.Type}, {"is_negative_transaction", type logical}, {"has_operational_issue", type logical}, {"has_suspicious_condition", type logical}, {"has_any_quality_flag", type logical}, {"is_valid_for_speed_analysis", type logical}})
+				in
+				  #"Changed Type"
+
+	changedProperty = IsHidden
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
