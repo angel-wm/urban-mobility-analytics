@@ -114,6 +114,7 @@ Revenue composition together with transaction-quality indicators and
 operational data-quality conditions.
 
 ![Revenue & Quality](docs/Images/dashboard_revenue_quality.png)
+
 ## Technology Stack
 
 - Python
