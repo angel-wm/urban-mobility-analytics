@@ -26,9 +26,6 @@ data/processed/
 *.log
 logs/
 
-# Power BI
-*.pbix
-
 # Operating systems
 .DS_Store
 Thumbs.db
