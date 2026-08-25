@@ -89,6 +89,31 @@ PostgreSQL
                            Python EDA and Power BI
 ```
 
+## Power BI Dashboard
+
+The Power BI report provides three analytical views built on top of the
+PostgreSQL dimensional model and optimized marts.
+
+### Executive Overview
+
+High-level view of trip volume, revenue, average trip performance, vendor mix,
+payment behavior, and daily mobility trends.
+
+![Executive Overview](docs/Images/dashboard_executive_overview.png)
+
+### Demand Patterns
+
+Analysis of taxi demand across hours, day periods, weekdays, and combined
+day-hour patterns.
+
+![Demand Patterns](docs/Images/dashboard_demand_patterns.png)
+
+### Revenue & Quality
+
+Revenue composition together with transaction-quality indicators and
+operational data-quality conditions.
+
+![Revenue & Quality](docs/Images/dashboard_revenue_quality.png)
 ## Technology Stack
 
 - Python
