@@ -1,5 +1,7 @@
 # Urban Mobility Analytics Pipeline
 
+![CI](https://github.com/angel-wm/urban-mobility-analytics/actions/workflows/ci.yml/badge.svg)
+
 A data engineering and analytics portfolio project that processes NYC Yellow
 Taxi trip data using Python, PostgreSQL, Docker, SQL, and Power BI.
 
