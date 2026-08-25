@@ -1,0 +1,128 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality-and-unit:
+    name: Quality and unit tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12.10"
+          cache: pip
+          cache-dependency-path: requirements-lock.txt
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements-lock.txt
+
+      - name: Run Ruff lint
+        run: ruff check src tests
+
+      - name: Check Ruff formatting
+        run: ruff format --check tests
+
+      - name: Run unit tests
+        run: python -m pytest -v
+
+  integration:
+    name: PostgreSQL integration tests
+    runs-on: ubuntu-latest
+
+    env:
+      POSTGRES_DB: mobility_ci
+      POSTGRES_USER: mobility_user
+      POSTGRES_PASSWORD: ci_password
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: "5432"
+
+      PGDATABASE: mobility_ci
+      PGUSER: mobility_user
+      PGPASSWORD: ci_password
+      PGHOST: localhost
+      PGPORT: "5432"
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: mobility_ci
+          POSTGRES_USER: mobility_user
+          POSTGRES_PASSWORD: ci_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U mobility_user -d mobility_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12.10"
+          cache: pip
+          cache-dependency-path: requirements-lock.txt
+
+      - name: Install Python dependencies
+        run: python -m pip install -r requirements-lock.txt
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-client
+
+      - name: Create schemas and raw tables
+        run: |
+          psql -v ON_ERROR_STOP=1 -f sql/init/01_create_schemas.sql
+          psql -v ON_ERROR_STOP=1 -f sql/ddl/01_create_raw_tables.sql
+
+      - name: Load development sample
+        run: python -m src.ingestion.load_sample
+
+      - name: Create staging layer
+        run: |
+          psql -v ON_ERROR_STOP=1 -f sql/staging/01_create_staging_taxi_trips.sql
+
+      - name: Create analytics layer
+        run: |
+          psql -v ON_ERROR_STOP=1 -f sql/analytics/01_create_daily_trip_metrics.sql
+          psql -v ON_ERROR_STOP=1 -f sql/analytics/03_create_hourly_trip_metrics.sql
+
+      - name: Create base analytical marts
+        run: |
+          psql -v ON_ERROR_STOP=1 -f sql/marts/01_create_daily_mobility_summary.sql
+          psql -v ON_ERROR_STOP=1 -f sql/marts/03_create_hourly_demand_profile.sql
+
+      - name: Build dimensional model
+        run: |
+          psql -v ON_ERROR_STOP=1 -f sql/dimensional/01_create_dimensional_tables.sql
+          psql -v ON_ERROR_STOP=1 -f sql/dimensional/02_load_dimensions.sql
+          psql -v ON_ERROR_STOP=1 -f sql/dimensional/03_load_fact_trip.sql
+
+      - name: Apply query optimizations
+        run: |
+          psql -v ON_ERROR_STOP=1 -f sql/optimization/01_create_query_optimization_indexes.sql
+          psql -v ON_ERROR_STOP=1 -f sql/optimization/02_optimize_mart_views.sql
+
+      - name: Run PostgreSQL integration tests
+        run: python -m pytest -m integration -v
