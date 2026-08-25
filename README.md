@@ -10,8 +10,8 @@ development using a production-oriented repository structure.
 ## Current Status
 
 The raw ingestion, SQL profiling, staging, analytics, analytical marts,
-dimensional-model, query-optimization, and automated-testing layers are
-complete.
+dimensional-model, query-optimization, automated-testing, Power BI, and
+continuous-integration layers are complete.
 
 The January 2025 Yellow Taxi dataset contains:
 
@@ -99,6 +99,7 @@ PostgreSQL
 - Docker and Docker Compose
 - Ruff
 - pytest
+- GitHub Actions
 - Power BI
 
 ## Repository Structure
@@ -316,6 +317,26 @@ explicitly with the `integration` marker.
 See [`docs/automated_tests.md`](docs/automated_tests.md) for the complete test
 strategy, coverage, commands, validation results, and limitations.
 
+## Continuous Integration
+
+The project uses GitHub Actions to validate code quality, unit tests, and the
+PostgreSQL analytical model automatically.
+
+The CI workflow runs on pushes to `main`, pull requests targeting `main`, and
+manual executions through `workflow_dispatch`.
+
+It contains two independent jobs:
+
+- code-quality checks and 33 unit tests
+- PostgreSQL 17 integration validation with 9 integration tests
+
+The integration job reconstructs a clean PostgreSQL environment from the
+version-controlled 5,000-row development sample and the repository SQL
+scripts. It does not depend on the developer's existing local database.
+
+See [`docs/continuous_integration.md`](docs/continuous_integration.md) for the
+complete workflow design, reconstruction process, validation results, and
+limitations.
 ## Project Roadmap
 
 - [x] Repository and local environment
@@ -330,8 +351,8 @@ strategy, coverage, commands, validation results, and limitations.
 - [x] Analytical marts
 - [x] Query optimization
 - [x] Automated tests
-- [ ] Power BI dashboard
-- [ ] Continuous integration
+- [x] Power BI dashboard
+- [x] Continuous integration
 
 ## Dataset
 
@@ -342,8 +363,4 @@ development sample is versioned.
 
 ## Author
 
-Angel Miller
-
-
-
-
+Angel Miller — [@angel-wm](https://github.com/angel-wm)
