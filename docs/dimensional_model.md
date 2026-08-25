@@ -668,7 +668,11 @@ Validated results:
   `EXPLAIN (ANALYZE, BUFFERS, SETTINGS, SUMMARY)`.
 - No materialized analytical layer has been introduced.
 - No slowly changing dimension Type 2 behavior is implemented.
-- No automated Python test suite currently executes the dimensional checks.
+- The automated PostgreSQL integration suite validates core dimensional
+  invariants, including fact-table grain, staging-to-fact reconciliation,
+  required schemas, and foreign-key integrity. The more exhaustive SQL
+  validation script remains the reference for full column-level and aggregate
+  reconciliation.
 - The load process performs upserts but does not delete obsolete target rows.
 
 The completed query-optimization work, including index selection, execution
@@ -679,7 +683,7 @@ results, is documented in `docs/query_optimization.md`.
 
 # Downstream Use
 
-The model is prepared for:
+The model currently supports:
 
 - Detailed trip analysis.
 - Dimensional SQL queries.

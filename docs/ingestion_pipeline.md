@@ -129,7 +129,8 @@ trip_duration_minutes
 average_speed_mph
 ```
 
-Those values will be calculated in later transformation layers.
+Those values are calculated downstream in the staging layer, keeping derived
+analytical fields separate from the source-preserving raw layer.
 
 ## Row Group Processing
 
@@ -279,8 +280,10 @@ The ingestion pipeline does not remove records only because they contain:
 These records may still represent refunds, reversals, corrections,
 administrative transactions, or other legitimate source activity.
 
-Data-quality flags and analytical exclusions will be implemented in the
-`staging` and `analytics` layers.
+Data-quality flags and analytical eligibility rules are implemented downstream
+in the `staging`, `analytics`, and dimensional layers. The raw ingestion layer
+therefore remains source-preserving and does not silently remove analytically
+unusual records.
 
 ## Current Loaded Data
 
@@ -381,22 +384,52 @@ ruff format --check src
 - The pipeline currently targets one fixed Yellow Taxi month.
 - The taxi type, year, month, and file path are constants in the scripts.
 - Failed rows are not yet written to a dedicated rejection table.
-- Analytical quality rules have not yet been implemented in SQL.
 - Automatic recovery for abandoned `started` ingestions is not yet available.
 - Database insertion currently uses pandas `to_sql`, which may later be
   replaced or optimized for larger production workloads.
 
-## Next Phase
+## Downstream Integration
 
-The next phase will use SQL to analyze and transform the raw data.
+The raw ingestion pipeline now serves as the source layer for the complete
+analytical workflow.
 
-It will include:
+After ingestion, the project applies the following downstream processing:
 
-- Filtering
-- Aggregations
-- Grouping
-- Null analysis
-- Date and time calculations
-- Joins with the ingestion log
-- Data-quality queries
-- Preparation for the `staging` layer
+```text
+raw.taxi_trips
+        |
+        v
+staging.taxi_trips
+        |
+        +---------------------------+
+        |                           |
+        v                           v
+analytics views              dimensional model
+        |                           |
+        |                           v
+        |                    marts.fact_trip
+        |                           |
+        +------ validation ---------+
+                                    |
+                                    v
+                         optimized analytical marts
+                                    |
+                                    v
+                                Power BI
+```
+
+The downstream layers provide:
+
+- SQL profiling and source-data analysis.
+- Standardized staging transformations.
+- Explicit data-quality flags.
+- Daily and hourly analytical metrics.
+- A trip-level dimensional model.
+- Optimized analytical marts.
+- Automated PostgreSQL integration tests.
+- Power BI reporting.
+- Continuous integration through GitHub Actions.
+
+The ingestion layer remains intentionally focused on reliable, auditable,
+idempotent movement of source records into PostgreSQL. Analytical business
+logic and reporting concerns are kept in downstream layers.

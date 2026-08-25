@@ -8,8 +8,8 @@ and selected PostgreSQL analytical invariants.
 The test suite is divided into two layers:
 
 - unit tests, which run without PostgreSQL or Docker;
-- integration tests, which execute read-only queries against the local
-  PostgreSQL database.
+- integration tests, which execute read-only queries against a PostgreSQL
+  database containing the reconstructed analytical model.
 
 This separation keeps the default test suite fast while still allowing the
 database model and analytical marts to be validated against the real project
@@ -120,8 +120,10 @@ Network requests are mocked, so these tests do not access the Internet.
 
 ## Integration Tests
 
-Integration tests are stored under `tests/integration/` and use the real local
-PostgreSQL database.
+Integration tests are stored under `tests/integration/` and execute against a
+real PostgreSQL database. They can run against the developer's local project
+database or against the clean PostgreSQL environment reconstructed by GitHub
+Actions.
 
 All implemented integration tests are read-only. They execute `SELECT`
 statements and do not insert, update, delete, create, or replace database
@@ -180,8 +182,10 @@ and:
 
 A total of 42 tests are therefore discovered by pytest.
 
-The final integration suite completed successfully against PostgreSQL 17.10
-with the current project data and dimensional model.
+The integration suite completed successfully during the Automated Tests phase
+against PostgreSQL 17.10 with the project data and dimensional model. The same
+test suite is now also executed automatically in GitHub Actions against a clean
+PostgreSQL 17 service reconstructed from the repository.
 
 Code-quality validation also succeeded:
 
@@ -217,21 +221,23 @@ Check test formatting:
 
 ## Scope and Limitations
 
-The Automated Tests stage intentionally does not introduce:
+The Automated Tests phase introduced the unit and PostgreSQL integration test
+suite. Continuous integration and GitHub Actions were implemented afterward
+and now execute the same automated validation as part of the repository's CI
+workflow.
 
-- continuous integration;
-- GitHub Actions;
+The current test strategy intentionally does not include:
+
 - test-coverage dependencies or coverage thresholds;
 - performance benchmark thresholds;
 - destructive database integration tests;
-- a separate test database;
-- automated Power BI validation.
+- automated Power BI visual or semantic-model tests.
 
-Continuous integration remains a later roadmap item.
-
-The integration suite currently validates the existing local PostgreSQL model
-and therefore requires the database container and project schemas to already be
-available.
+The PostgreSQL integration suite requires the project database model to exist
+before the tests run. Locally, this means the required schemas and analytical
+objects must already be available. In CI, GitHub Actions reconstructs that
+database automatically from the version-controlled development sample and SQL
+scripts before executing the integration suite.
 
 The automated tests complement the detailed SQL validation scripts already
 present in the repository; they do not replace those scripts.

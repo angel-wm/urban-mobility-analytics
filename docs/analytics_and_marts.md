@@ -575,7 +575,9 @@ The validation confirmed:
 
 # Deployment Order
 
-The models must be created in dependency order:
+The analytical models must be created in dependency order.
+
+First, create the staging-based analytics views:
 
 ```powershell
 Get-Content -Raw .\sql\analytics\01_create_daily_trip_metrics.sql |
@@ -589,7 +591,11 @@ Get-Content -Raw .\sql\analytics\03_create_hourly_trip_metrics.sql |
         -v ON_ERROR_STOP=1 `
         -U mobility_user `
         -d mobility_db
+```
 
+Next, create the base mart definitions:
+
+```powershell
 Get-Content -Raw .\sql\marts\01_create_daily_mobility_summary.sql |
     docker compose exec -T db psql `
         -v ON_ERROR_STOP=1 `
@@ -603,7 +609,49 @@ Get-Content -Raw .\sql\marts\03_create_hourly_demand_profile.sql |
         -d mobility_db
 ```
 
-The validation scripts should then be executed:
+The dimensional model must then be created and populated:
+
+```powershell
+Get-Content -Raw .\sql\dimensional\01_create_dimensional_tables.sql |
+    docker compose exec -T db psql `
+        -v ON_ERROR_STOP=1 `
+        -U mobility_user `
+        -d mobility_db
+
+Get-Content -Raw .\sql\dimensional\02_load_dimensions.sql |
+    docker compose exec -T db psql `
+        -v ON_ERROR_STOP=1 `
+        -U mobility_user `
+        -d mobility_db
+
+Get-Content -Raw .\sql\dimensional\03_load_fact_trip.sql |
+    docker compose exec -T db psql `
+        -v ON_ERROR_STOP=1 `
+        -U mobility_user `
+        -d mobility_db
+```
+
+Finally, apply the query-optimization scripts:
+
+```powershell
+Get-Content -Raw .\sql\optimization\01_create_query_optimization_indexes.sql |
+    docker compose exec -T db psql `
+        -v ON_ERROR_STOP=1 `
+        -U mobility_user `
+        -d mobility_db
+
+Get-Content -Raw .\sql\optimization\02_optimize_mart_views.sql |
+    docker compose exec -T db psql `
+        -v ON_ERROR_STOP=1 `
+        -U mobility_user `
+        -d mobility_db
+```
+
+The optimization override must be the final mart-definition step because it
+replaces the historical staging-based mart definitions with the optimized
+fact-based versions.
+
+The validation scripts can then be executed:
 
 ```powershell
 Get-Content -Raw .\sql\analytics\02_validate_daily_trip_metrics.sql |
@@ -631,6 +679,13 @@ Get-Content -Raw .\sql\marts\04_validate_hourly_demand_profile.sql |
         -d mobility_db
 ```
 
+The PostgreSQL integration suite provides an additional automated validation
+layer:
+
+```powershell
+python -m pytest -m integration -v
+```
+
 ---
 
 # Reexecution
@@ -653,7 +708,9 @@ No script:
 # Known Limitations
 
 - The models are normal views and have no indexes of their own.
-- Query performance has not yet been evaluated with `EXPLAIN ANALYZE`.
+- Query performance has been evaluated with
+  `EXPLAIN (ANALYZE, BUFFERS, SETTINGS, SUMMARY)`, and the final mart
+  definitions were optimized based on the measured execution plans.
 - January 2025 is the only complete monthly ingestion currently validated.
 - The development sample remains visible as a separate ingestion.
 - The models do not validate pickup or dropoff locations against an official
@@ -670,7 +727,7 @@ No script:
 
 # Downstream Use
 
-The models are prepared for use by:
+The models currently support:
 
 - Advanced SQL analysis.
 - Operational and quality reporting.
@@ -679,7 +736,8 @@ The models are prepared for use by:
 - Daily mobility trend analysis.
 - Hourly demand analysis.
 - Revenue and adjustment analysis.
-- Future dimensional models.
+- Dimensional-model reconciliation.
+- Power BI analytical reporting.
 
 Consumers must filter by the intended `ingestion_id` unless combining
 ingestions is an explicit analytical requirement.

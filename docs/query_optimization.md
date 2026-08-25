@@ -25,11 +25,11 @@ The work evaluated:
 - The execution path of the daily and hourly analytical marts.
 - Functional equivalence before and after optimization.
 
-The following roadmap items remain outside this work:
-
-- Automated tests.
-- Power BI dashboard.
-- Continuous integration.
+This optimization phase was intentionally limited to PostgreSQL query
+performance and did not modify the automated test suite, Power BI report, or
+continuous integration workflow. Those components were implemented in
+subsequent project phases and now validate or consume the optimized analytical
+model.
 
 ---
 
@@ -494,7 +494,7 @@ Get-Content -Raw `
 
 Query optimization is complete.
 
-The current implementation has:
+The current implementation includes:
 
 - A versioned selective fact-table index.
 - Optimized daily and hourly mart definitions.
@@ -503,4 +503,6 @@ The current implementation has:
 - Reproducible SQL deployment commands.
 - Documented performance improvements.
 
-The next roadmap item is `Automated tests`.
+The optimized model is now covered by PostgreSQL integration tests, rebuilt
+automatically in GitHub Actions, and used as part of the analytical foundation
+for the Power BI reporting layer.

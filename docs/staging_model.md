@@ -602,7 +602,11 @@ The validation script contains only read operations.
 - Missing attributes associated with Flex Fare trips have not been confirmed
   as source errors.
 - The view is not materialized and has no indexes of its own.
-- Query performance has not yet been evaluated with `EXPLAIN ANALYZE`.
+- The staging view remains a normal PostgreSQL view and has no indexes of its
+  own. Query-performance analysis later showed that repeatedly evaluating the
+  staging-based path was more expensive for final consumption queries, which
+  led to the optimized fact-based mart architecture documented in
+  `docs/query_optimization.md`.
 - A single mutually exclusive quality classification has not been defined.
 - The current staging layer does not exclude records from downstream metrics;
   consumers must select the appropriate flags for each analytical use case.
@@ -611,17 +615,26 @@ The validation script contains only read operations.
 
 ## Downstream Use
 
-The staging view is prepared for later use by:
+The staging view serves as the standardized source for multiple downstream
+components of the project:
 
-- Advanced SQL analysis.
 - Analytics-layer transformations.
-- Dimensional modeling.
-- Data marts.
-- Python exploratory analysis.
-- Power BI.
+- Daily and hourly analytical metrics.
+- Dimensional-model population.
+- Data-quality reconciliation.
+- PostgreSQL integration tests.
+- Independent validation of the optimized analytical marts.
 
-Downstream models should use detailed flags rather than assuming that every
-flagged record must be removed.
+The dimensional model is populated from `staging.taxi_trips`, while the
+staging-based analytics views remain available as independent reconciliation
+references for the optimized fact-based marts.
+
+Power BI primarily consumes the downstream dimensional and analytical models
+rather than using the staging view as its reporting layer.
+
+Downstream models should use detailed quality flags according to the
+requirements of each metric instead of assuming that every flagged record must
+be removed.
 
 The raw layer remains the source-preserving record of the original ingested
 data.

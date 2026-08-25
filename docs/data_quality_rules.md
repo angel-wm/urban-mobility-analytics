@@ -1,24 +1,27 @@
-# Initial Data Quality Rules
+# Data Quality Rules
 
 ## Purpose
 
-This document defines the preliminary data quality rules identified during the
-initial exploration of the January 2025 NYC Yellow Taxi trip dataset.
+This document records the evolution of the data-quality rules used for the
+January 2025 NYC Yellow Taxi dataset.
 
-These rules are provisional. They will be reviewed while developing the
-ingestion and transformation pipeline and after analyzing the complete monthly
-dataset.
+Sections 1 through 12 preserve the preliminary rules identified during the
+initial exploratory phase. They are retained as the historical design basis and
+should not be interpreted as the final implementation.
 
-The raw source records will be preserved whenever possible. Suspicious or
-invalid records should be classified and documented instead of being removed
-without explanation.
+Section 13 documents the implemented staging-layer behavior after profiling the
+complete monthly dataset and validating the relevant categorical definitions.
+
+The final design follows a source-preserving approach: raw records are retained
+whenever they can be represented technically, while analytical conditions are
+expressed through explicit quality flags and metric-specific eligibility rules.
 
 ---
 
 ## 1. Record Classification
 
-Each trip record will eventually be assigned one of the following analytical
-classifications:
+The initial design considered assigning each trip record one or more of the
+following analytical classifications:
 
 - `valid`: The record passes the current operational quality checks.
 - `suspicious`: The record contains unusual values that require review but may
@@ -30,8 +33,9 @@ classifications:
 - `outside_expected_period`: The pickup timestamp falls outside the month being
   processed.
 
-A record may satisfy more than one condition. Therefore, the final pipeline may
-store individual quality flags in addition to an overall classification.
+A record may satisfy more than one condition. The implemented design therefore
+uses independent boolean quality flags instead of forcing every record into a
+single mutually exclusive classification.
 
 ---
 
@@ -269,12 +273,13 @@ It should not silently:
 - Replace unknown codes.
 - Delete suspicious records.
 
-Cleaning, classification, and analytical exclusions will occur in later
-layers, especially `staging` and `analytics`.
+Cleaning logic, quality classification, and analytical eligibility rules are
+implemented downstream, primarily in the `staging`, `analytics`, and
+dimensional layers.
 
 ---
 
-## 12. Current Limitations
+## 12. Initial Exploration Limitations
 
 - The initial analysis used only the first Parquet row group.
 - The quality percentages do not yet represent the complete month.

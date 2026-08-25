@@ -52,7 +52,11 @@ No rows were found where only one of `passenger_count` or `ratecode_id` was null
 
 `payment_type`, `fare_amount`, `total_amount`, `pickup_datetime`, and `dropoff_datetime` contain no null values.
 
-The meaning of `payment_type = 0` and its relationship with the missing values has not yet been validated against the official NYC TLC data dictionary.
+At the time of the initial SQL profile, the meaning of `payment_type = 0` and
+its relationship with the missing values had not yet been validated against the
+official NYC TLC data dictionary. This validation was completed later during
+the staging-model phase, where payment type `0` was documented as a Flex Fare
+trip.
 
 ## Category Distributions
 
@@ -112,7 +116,10 @@ The least frequent values are:
 | 6 | 489 |
 | 7 | 1,206 |
 
-The meanings of vendor IDs 6 and 7 have not yet been validated against the official source documentation.
+At the time of the initial SQL profile, the meanings of vendor IDs 6 and 7 had
+not yet been validated against the official source documentation. They were
+subsequently validated during staging-model development as Myle Technologies
+Inc. and Helix, respectively.
 
 ### Store and Forward Flag
 
