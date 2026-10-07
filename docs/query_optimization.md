@@ -1,5 +1,16 @@
 # Query Optimization
 
+## Quick navigation
+
+- [Scope](#scope)
+- [Baseline performance](#baseline-performance)
+- [Architectural decision](#architectural-decision)
+- [Versioned optimization scripts](#versioned-optimization-scripts)
+- [Final performance](#final-performance)
+- [Deployment order](#deployment-order)
+- [Reproduction commands](#reproduction-commands)
+
+
 ## Purpose
 
 This document records the query-performance analysis and physical optimization
