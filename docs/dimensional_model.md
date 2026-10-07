@@ -1,5 +1,18 @@
 # Dimensional Model
 
+## Quick navigation
+
+- [Overview](#overview)
+- [Dimensional architecture](#dimensional-architecture)
+- [Dimensions](#dimensions)
+- [Fact table](#fact-table)
+- [Data population](#data-population)
+- [Missing, unknown, and unrecognized values](#missing-unknown-and-unrecognized-values)
+- [Load process](#load-process)
+- [Validation](#validation)
+- [Known limitations](#known-limitations)
+
+
 ## Overview
 
 The dimensional model provides a trip-level star schema for detailed mobility,
@@ -98,21 +111,21 @@ All objects are physical PostgreSQL tables.
 
 ---
 
-# Dimensions
+## Dimensions
 
-## `marts.dim_ingestion`
+### `marts.dim_ingestion`
 
-### Grain
+#### Grain
 
 One row per ingestion audit record.
 
-### Key
+#### Key
 
 - `ingestion_id`
 
 The source identity from `raw.ingestion_log` is reused directly.
 
-### Attributes
+#### Attributes
 
 - Source file name.
 - Taxi type.
@@ -123,7 +136,7 @@ The source identity from `raw.ingestion_log` is reused directly.
 - Start and completion timestamps.
 - Error message.
 
-### Current Row Count
+#### Current Row Count
 
 6 rows.
 
@@ -134,13 +147,13 @@ Only completed ingestions 1 and 7 currently have corresponding rows in
 
 ---
 
-## `marts.dim_date`
+### `marts.dim_date`
 
-### Grain
+#### Grain
 
 One row per calendar date.
 
-### Key
+#### Key
 
 - `date_key`
 
@@ -152,14 +165,14 @@ Example:
 20250131
 ```
 
-### Role-Playing Relationships
+#### Role-Playing Relationships
 
 The same dimension is referenced as:
 
 - Pickup date.
 - Drop-off date.
 
-### Attributes
+#### Attributes
 
 - Full date.
 - Calendar year.
@@ -172,7 +185,7 @@ The same dimension is referenced as:
 - ISO week.
 - Weekend indicator.
 
-### Current Coverage
+#### Current Coverage
 
 - Minimum date: 2024-12-18.
 - Maximum date: 2025-02-01.
@@ -187,60 +200,60 @@ values.
 
 ---
 
-## `marts.dim_hour`
+### `marts.dim_hour`
 
-### Grain
+#### Grain
 
 One row per hour of day.
 
-### Key
+#### Key
 
 - `hour_key`
 
 Valid keys range from 0 through 23.
 
-### Role-Playing Relationships
+#### Role-Playing Relationships
 
 The same dimension is referenced as:
 
 - Pickup hour.
 - Drop-off hour.
 
-### Attributes
+#### Attributes
 
 - Hour label.
 - Day period.
 
-### Day Period Classification
+#### Day Period Classification
 
 - Hours 00 through 05: `Night`.
 - Hours 06 through 11: `Morning`.
 - Hours 12 through 17: `Afternoon`.
 - Hours 18 through 23: `Evening`.
 
-### Current Row Count
+#### Current Row Count
 
 24 rows, with no missing hours.
 
 ---
 
-## `marts.dim_vendor`
+### `marts.dim_vendor`
 
-### Grain
+#### Grain
 
 One row per vendor code.
 
-### Keys
+#### Keys
 
 - Surrogate key: `vendor_key`.
 - Source code: `vendor_id`.
 
-### Attributes
+#### Attributes
 
 - Vendor name.
 - Unrecognized-code indicator.
 
-### Current Row Count
+#### Current Row Count
 
 4 rows.
 
@@ -253,25 +266,25 @@ The currently represented vendors are:
 
 ---
 
-## `marts.dim_rate_code`
+### `marts.dim_rate_code`
 
-### Grain
+#### Grain
 
 One row per rate-code state.
 
-### Keys
+#### Keys
 
 - Surrogate key: `rate_code_key`.
 - Source code: `ratecode_id`.
 
-### Attributes
+#### Attributes
 
 - Rate-code description.
 - Unrecognized-code indicator.
 - Documented-unknown indicator.
 - Missing-value indicator.
 
-### Current Row Count
+#### Current Row Count
 
 8 rows.
 
@@ -285,24 +298,24 @@ A documented unknown value is not treated as equivalent to a missing value.
 
 ---
 
-## `marts.dim_payment_type`
+### `marts.dim_payment_type`
 
-### Grain
+#### Grain
 
 One row per payment-type code.
 
-### Keys
+#### Keys
 
 - Surrogate key: `payment_type_key`.
 - Source code: `payment_type`.
 
-### Attributes
+#### Attributes
 
 - Payment-type description.
 - Unrecognized-code indicator.
 - Documented-unknown indicator.
 
-### Current Row Count
+#### Current Row Count
 
 6 rows.
 
@@ -313,24 +326,24 @@ The model preserves:
 
 ---
 
-## `marts.dim_store_and_fwd`
+### `marts.dim_store_and_fwd`
 
-### Grain
+#### Grain
 
 One row per store-and-forward state.
 
-### Keys
+#### Keys
 
 - Surrogate key: `store_and_fwd_key`.
 - Source value: `store_and_fwd_flag`.
 
-### Attributes
+#### Attributes
 
 - Store-and-forward description.
 - Unrecognized-value indicator.
 - Missing-value indicator.
 
-### Current Row Count
+#### Current Row Count
 
 3 rows.
 
@@ -342,19 +355,19 @@ The represented states are:
 
 ---
 
-# Fact Table
+## Fact Table
 
-## `marts.fact_trip`
+### `marts.fact_trip`
 
-### Grain
+#### Grain
 
 One row per `raw_trip_id`.
 
-### Primary Key
+#### Primary Key
 
 - `raw_trip_id`
 
-### Foreign Keys
+#### Foreign Keys
 
 - `ingestion_id`
 - `pickup_date_key`
@@ -370,7 +383,7 @@ All foreign-key relationships are enforced by PostgreSQL constraints.
 
 Validation found zero orphaned keys.
 
-### Operational Attributes
+#### Operational Attributes
 
 The fact table preserves:
 
@@ -384,14 +397,14 @@ The full timestamps are retained even though date and hour keys are also
 available. This preserves detailed event timing while supporting dimensional
 aggregation.
 
-### Trip Measures
+#### Trip Measures
 
 - Passenger count.
 - Trip distance.
 - Trip duration in minutes.
 - Average speed in miles per hour.
 
-### Monetary Measures
+#### Monetary Measures
 
 - Fare amount.
 - Extra amount.
@@ -406,7 +419,7 @@ aggregation.
 
 All monetary columns retain the staging `NUMERIC(12, 2)` representation.
 
-### Data-Quality Flags
+#### Data-Quality Flags
 
 The fact table preserves all detailed and aggregate staging flags:
 
@@ -435,9 +448,9 @@ No quality flag causes automatic removal from the dimensional model.
 
 ---
 
-# Data Population
+## Data Population
 
-## Current Counts
+### Current Counts
 
 | Object | Row Count |
 |---|---:|
@@ -450,7 +463,7 @@ No quality flag causes automatic removal from the dimensional model.
 | `marts.dim_store_and_fwd` | 3 |
 | `marts.fact_trip` | 3,480,226 |
 
-## Fact Rows by Ingestion
+### Fact Rows by Ingestion
 
 | Ingestion | Rows |
 |---:|---:|
@@ -462,7 +475,7 @@ have fact rows.
 
 ---
 
-# Relationship with Analytical Models
+## Relationship with Analytical Models
 
 The dimensional fact table and the existing analytics models serve different
 purposes.
@@ -498,11 +511,11 @@ references for reconciliation of the optimized marts.
 
 ---
 
-# Missing, Unknown, and Unrecognized Values
+## Missing, Unknown, and Unrecognized Values
 
 The model keeps these states separate.
 
-## Missing
+### Missing
 
 The original source value is null or absent.
 
@@ -511,7 +524,7 @@ Examples:
 - Missing rate code.
 - Missing store-and-forward flag.
 
-## Documented Unknown
+### Documented Unknown
 
 The source provides a documented code whose defined meaning is `Unknown`.
 
@@ -520,7 +533,7 @@ Examples:
 - Rate code `99`.
 - Payment type `5`.
 
-## Unrecognized
+### Unrecognized
 
 The source code is not included in the implemented mapping.
 
@@ -529,7 +542,7 @@ The model preserves the source code and the corresponding
 
 ---
 
-# Taxi Zone Handling
+## Taxi Zone Handling
 
 `pickup_location_id` and `dropoff_location_id` are retained directly in
 `marts.fact_trip`.
@@ -549,7 +562,7 @@ the official lookup file.
 
 ---
 
-# Load Process
+## Load Process
 
 The dimensional implementation is versioned in:
 
@@ -558,7 +571,7 @@ The dimensional implementation is versioned in:
 - `sql/dimensional/03_load_fact_trip.sql`
 - `sql/dimensional/04_validate_dimensional_model.sql`
 
-## Execution Order
+### Execution Order
 
 ```powershell
 Get-Content -Raw .\sql\dimensional\01_create_dimensional_tables.sql |
@@ -589,7 +602,7 @@ Get-Content -Raw .\sql\dimensional\04_validate_dimensional_model.sql |
 
 ---
 
-# Reexecution
+## Reexecution
 
 The DDL uses `CREATE TABLE IF NOT EXISTS`.
 
@@ -618,7 +631,7 @@ existing table definition changes.
 
 ---
 
-# Validation
+## Validation
 
 The validation script checks:
 
@@ -654,7 +667,7 @@ Validated results:
 
 ---
 
-# Known Limitations
+## Known Limitations
 
 - The model currently covers one development sample and one complete monthly
   ingestion.
@@ -681,7 +694,7 @@ results, is documented in `docs/query_optimization.md`.
 
 ---
 
-# Downstream Use
+## Downstream Use
 
 The model currently supports:
 

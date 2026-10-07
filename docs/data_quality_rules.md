@@ -1,5 +1,13 @@
 # Data Quality Rules
 
+## Quick navigation
+
+- [Record classification](#1-record-classification)
+- [Initial exploration limitations](#12-initial-exploration-limitations)
+- [Staging implementation update](#13-staging-implementation-update)
+- [Rules not yet formalized](#rules-not-yet-formalized)
+
+
 ## Purpose
 
 This document records the evolution of the data-quality rules used for the

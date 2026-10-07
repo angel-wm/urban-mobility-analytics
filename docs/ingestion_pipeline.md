@@ -1,5 +1,16 @@
 # Raw Ingestion Pipeline
 
+## Quick navigation
+
+- [Pipeline flow](#pipeline-flow)
+- [Main components](#main-components)
+- [Idempotency](#idempotency)
+- [Failure handling](#failure-handling)
+- [Row count validation](#row-count-validation)
+- [Commands](#commands)
+- [Current limitations](#current-limitations)
+
+
 ## Purpose
 
 The raw ingestion pipeline loads NYC Yellow Taxi Parquet files into PostgreSQL

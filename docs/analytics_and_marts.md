@@ -1,5 +1,16 @@
 # Analytics and Marts Models
 
+## Quick navigation
+
+- [Data flow](#data-flow)
+- [Analytics layer](#analytics-layer)
+- [Marts layer](#marts-layer)
+- [Deployment order](#deployment-order)
+- [Reexecution](#reexecution)
+- [Known limitations](#known-limitations)
+- [Downstream use](#downstream-use)
+
+
 ## Purpose
 
 This document describes the analytics-layer models built from
@@ -103,23 +114,23 @@ negative amounts are also exposed separately.
 
 ---
 
-# Analytics Layer
+## Analytics Layer
 
-## `analytics.daily_trip_metrics`
+### `analytics.daily_trip_metrics`
 
-### Object Type
+#### Object Type
 
 PostgreSQL view.
 
-### Definition File
+#### Definition File
 
 `sql/analytics/01_create_daily_trip_metrics.sql`
 
-### Validation File
+#### Validation File
 
 `sql/analytics/02_validate_daily_trip_metrics.sql`
 
-### Grain
+#### Grain
 
 One row per:
 
@@ -129,12 +140,12 @@ One row per:
 The ingestion identifier is part of the grain to prevent a development sample
 and a complete monthly ingestion from being combined.
 
-### Purpose
+#### Purpose
 
 The view provides reusable daily mobility, financial, operational, and
 data-quality metrics.
 
-### Dimensions and Traceability
+#### Dimensions and Traceability
 
 - `ingestion_id`
 - `source_file_name`
@@ -143,7 +154,7 @@ data-quality metrics.
 - `period_month`
 - `pickup_date`
 
-### Count Metrics
+#### Count Metrics
 
 - `trip_count`
 - `operational_issue_trip_count`
@@ -152,7 +163,7 @@ data-quality metrics.
 - `negative_transaction_trip_count`
 - `valid_speed_trip_count`
 
-### Distance, Duration, and Speed Metrics
+#### Distance, Duration, and Speed Metrics
 
 - `total_trip_distance`
 - `average_trip_distance`
@@ -167,7 +178,7 @@ hours.
 Average speed uses only records where
 `is_valid_for_speed_analysis = TRUE`.
 
-### Monetary Metrics
+#### Monetary Metrics
 
 - `positive_total_amount`
 - `negative_total_amount`
@@ -184,7 +195,7 @@ positive_total_amount
 
 `negative_total_amount` remains negative.
 
-### SQL Techniques
+#### SQL Techniques
 
 - Common table expressions.
 - Conditional aggregation with `FILTER`.
@@ -192,7 +203,7 @@ positive_total_amount
 - Explicit numeric casting.
 - Reusable ingestion-aware grouping.
 
-### January 2025 Validation
+#### January 2025 Validation
 
 For `ingestion_id = 7`:
 
@@ -208,7 +219,7 @@ The complete ingestion contains 3,475,226 rows. The analytics model represents
 3,475,204 rows because 22 trips have pickup timestamps outside the expected
 monthly period.
 
-### Validation Results
+#### Validation Results
 
 The validation confirmed:
 
@@ -221,21 +232,21 @@ The validation confirmed:
 
 ---
 
-## `analytics.hourly_trip_metrics`
+### `analytics.hourly_trip_metrics`
 
-### Object Type
+#### Object Type
 
 PostgreSQL view.
 
-### Definition File
+#### Definition File
 
 `sql/analytics/03_create_hourly_trip_metrics.sql`
 
-### Validation File
+#### Validation File
 
 `sql/analytics/04_validate_hourly_trip_metrics.sql`
 
-### Grain
+#### Grain
 
 One row per:
 
@@ -243,12 +254,12 @@ One row per:
 - `pickup_date`
 - `pickup_hour`
 
-### Purpose
+#### Purpose
 
 The view provides date-hour mobility metrics that can be aggregated into
 hourly demand profiles or consumed directly for detailed time-series analysis.
 
-### Dimensions and Traceability
+#### Dimensions and Traceability
 
 - `ingestion_id`
 - `source_file_name`
@@ -258,7 +269,7 @@ hourly demand profiles or consumed directly for detailed time-series analysis.
 - `pickup_date`
 - `pickup_hour`
 
-### Metrics
+#### Metrics
 
 The hourly view exposes the same metric categories as the daily analytics
 view:
@@ -271,7 +282,7 @@ view:
 - Speed metrics.
 - Positive, negative, net, and average total amounts.
 
-### SQL Techniques
+#### SQL Techniques
 
 - Common table expressions.
 - Conditional aggregation with `FILTER`.
@@ -279,7 +290,7 @@ view:
 - Explicit numeric casting.
 - Reconciliation between hourly and daily grains.
 
-### January 2025 Validation
+#### January 2025 Validation
 
 For `ingestion_id = 7`:
 
@@ -296,7 +307,7 @@ The 744 rows correspond to:
 31 dates × 24 hours = 744 date-hour combinations
 ```
 
-### Validation Results
+#### Validation Results
 
 The validation confirmed:
 
@@ -310,34 +321,34 @@ The validation confirmed:
 
 ---
 
-# Marts Layer
+## Marts Layer
 
-## `marts.daily_mobility_summary`
+### `marts.daily_mobility_summary`
 
-### Object Type
+#### Object Type
 
 PostgreSQL view.
 
-### Base Definition File
+#### Base Definition File
 
 `sql/marts/01_create_daily_mobility_summary.sql`
 
-### Optimization Override
+#### Optimization Override
 
 `sql/optimization/02_optimize_mart_views.sql`
 
-### Validation File
+#### Validation File
 
 `sql/marts/02_validate_daily_mobility_summary.sql`
 
-### Grain
+#### Grain
 
 One row per:
 
 - `ingestion_id`
 - `pickup_date`
 
-### Source
+#### Source
 
 The optimized view aggregates from:
 
@@ -348,20 +359,20 @@ The optimized view aggregates from:
 `analytics.daily_trip_metrics` remains the independent staging-based reference
 used to reconcile and validate the mart output.
 
-### Purpose
+#### Purpose
 
 The mart enriches the daily analytical metrics with time-series indicators
 suitable for reporting and dashboard consumption.
 
-### Window Metrics
+#### Window Metrics
 
-#### Previous-Day Demand
+##### Previous-Day Demand
 
 `previous_day_trip_count`
 
 Calculated with `LAG`.
 
-#### Daily Absolute Change
+##### Daily Absolute Change
 
 `daily_trip_count_change`
 
@@ -371,25 +382,25 @@ Calculated as:
 trip_count - previous_day_trip_count
 ```
 
-#### Daily Percentage Change
+##### Daily Percentage Change
 
 `daily_trip_count_change_percentage`
 
 The first represented date returns `NULL` because no previous day exists.
 
-#### Cumulative Trips
+##### Cumulative Trips
 
 `cumulative_trip_count`
 
 Calculated with an ordered cumulative `SUM`.
 
-#### Cumulative Net Amount
+##### Cumulative Net Amount
 
 `cumulative_net_total_amount`
 
 Calculated with an ordered cumulative `SUM`.
 
-#### Seven-Day Rolling Average
+##### Seven-Day Rolling Average
 
 `rolling_7_day_average_trip_count`
 
@@ -402,19 +413,19 @@ ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
 The first six dates use a progressively growing window. Starting with the
 seventh date, the metric uses seven rows.
 
-#### Demand Ranking
+##### Demand Ranking
 
 `trip_demand_rank`
 
 Calculated with `RANK`, ordered by descending daily trip count.
 
-#### Period Share
+##### Period Share
 
 `period_trip_share_percentage`
 
 Represents each date's percentage of the ingestion-level trip count.
 
-### January 2025 Validation
+#### January 2025 Validation
 
 For `ingestion_id = 7`:
 
@@ -429,7 +440,7 @@ The sum of individually rounded daily period shares is 99.9998 percent. This
 minor difference from 100 percent is caused by rounding each daily
 participation to four decimal places.
 
-### Validation Results
+#### Validation Results
 
 The validation confirmed:
 
@@ -441,32 +452,32 @@ The validation confirmed:
 
 ---
 
-## `marts.hourly_demand_profile`
+### `marts.hourly_demand_profile`
 
-### Object Type
+#### Object Type
 
 PostgreSQL view.
 
-### Base Definition File
+#### Base Definition File
 
 `sql/marts/03_create_hourly_demand_profile.sql`
 
-### Optimization Override
+#### Optimization Override
 
 `sql/optimization/02_optimize_mart_views.sql`
 
-### Validation File
+#### Validation File
 
 `sql/marts/04_validate_hourly_demand_profile.sql`
 
-### Grain
+#### Grain
 
 One row per:
 
 - `ingestion_id`
 - `pickup_hour`
 
-### Source
+#### Source
 
 The optimized view aggregates from:
 
@@ -478,12 +489,12 @@ The optimized view aggregates from:
 `analytics.hourly_trip_metrics` remains the independent staging-based reference
 used to reconcile and validate the mart output.
 
-### Purpose
+#### Purpose
 
 The mart summarizes the demand and quality behavior of each hour across all
 represented dates within an ingestion.
 
-### Base Metrics
+#### Base Metrics
 
 - `represented_day_count`
 - `trip_count`
@@ -495,9 +506,9 @@ represented dates within an ingestion.
 - Net total amount.
 - Average net total amount per trip.
 
-### Window Metrics
+#### Window Metrics
 
-#### Previous-Hour Demand
+##### Previous-Hour Demand
 
 `previous_hour_trip_count`
 
@@ -505,24 +516,24 @@ Calculated with `LAG`, ordered from hour 0 through hour 23.
 
 This comparison is linear and does not treat hour 0 as following hour 23.
 
-#### Hourly Absolute Change
+##### Hourly Absolute Change
 
 `hourly_trip_count_change`
 
-#### Hourly Percentage Change
+##### Hourly Percentage Change
 
 `hourly_trip_count_change_percentage`
 
 Hour 0 returns `NULL` because no previous hour exists in the ordered
 partition.
 
-#### Cumulative Demand
+##### Cumulative Demand
 
 `cumulative_trip_count`
 
 Calculated from hour 0 through the current hour.
 
-#### Three-Hour Rolling Average
+##### Three-Hour Rolling Average
 
 `rolling_3_hour_average_trip_count`
 
@@ -532,19 +543,19 @@ Calculated with:
 ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
 ```
 
-#### Demand Ranking
+##### Demand Ranking
 
 `demand_rank`
 
 Calculated with `RANK`, ordered by descending hourly trip count.
 
-#### Period Share
+##### Period Share
 
 `period_trip_share_percentage`
 
 Represents each hour's share of all trips in the ingestion.
 
-### January 2025 Validation
+#### January 2025 Validation
 
 For `ingestion_id = 7`:
 
@@ -558,7 +569,7 @@ For `ingestion_id = 7`:
 - Trips during the highest-demand hour: 267,951.
 - Rounded period shares: 100.0000 percent.
 
-### Validation Results
+#### Validation Results
 
 The validation confirmed:
 
@@ -573,7 +584,7 @@ The validation confirmed:
 
 ---
 
-# Deployment Order
+## Deployment Order
 
 The analytical models must be created in dependency order.
 
@@ -688,7 +699,7 @@ python -m pytest -m integration -v
 
 ---
 
-# Reexecution
+## Reexecution
 
 All four objects use `CREATE OR REPLACE VIEW`.
 
@@ -705,7 +716,7 @@ No script:
 
 ---
 
-# Known Limitations
+## Known Limitations
 
 - The models are normal views and have no indexes of their own.
 - Query performance has been evaluated with
@@ -725,7 +736,7 @@ No script:
 
 ---
 
-# Downstream Use
+## Downstream Use
 
 The models currently support:
 
