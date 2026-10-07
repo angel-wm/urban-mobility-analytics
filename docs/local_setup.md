@@ -230,7 +230,7 @@ Run code-quality checks:
 
 ```powershell
 ruff check src tests
-ruff format --check tests
+ruff format --check src tests
 ```
 
 ## Related documentation
