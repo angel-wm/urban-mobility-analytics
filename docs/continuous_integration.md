@@ -44,7 +44,7 @@ It performs:
 
 5. Ruff formatting validation:
 
-    ruff format --check tests
+    ruff format --check src tests
 
 6. Default pytest execution:
 
@@ -167,7 +167,7 @@ database.
 The main local quality commands remain:
 
     ruff check src tests
-    ruff format --check tests
+    ruff format --check src tests
     python -m pytest -v
 
 PostgreSQL integration tests can be run against a prepared local database with:
