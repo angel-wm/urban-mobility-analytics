@@ -1,5 +1,17 @@
 # Staging Taxi Trips Model
 
+## Quick navigation
+
+- [Sources](#sources)
+- [Grain](#grain)
+- [Detailed quality flags](#detailed-quality-flags)
+- [January 2025 validation results](#january-2025-validation-results)
+- [Deployment](#deployment)
+- [Validation](#validation)
+- [Limitations](#limitations)
+- [Downstream use](#downstream-use)
+
+
 ## Purpose
 
 This document describes the staging model created from the NYC TLC Yellow Taxi
