@@ -194,8 +194,8 @@ Code-quality validation also succeeded:
 
 and:
 
-    ruff format --check tests
-    9 files already formatted
+    ruff format --check src tests
+    23 files already formatted
 
 ## Recommended Commands
 
@@ -215,9 +215,9 @@ Check Python code quality:
 
     ruff check src tests
 
-Check test formatting:
+Check Python formatting:
 
-    ruff format --check tests
+    ruff format --check src tests
 
 ## Scope and Limitations
 
